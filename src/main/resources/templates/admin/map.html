@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{admin/fragments :: head('Live map')}"></head>
+<body>
+<div class="container-scroller">
+  <nav th:replace="~{admin/fragments :: navbar}"></nav>
+  <div class="container-fluid page-body-wrapper">
+    <nav th:replace="~{admin/fragments :: sidebar}"></nav>
+    <div class="main-panel">
+      <div class="content-wrapper">
+        <div th:replace="~{admin/fragments :: flash}"></div>
+        <div class="row mb-3">
+          <div class="col-4"><div class="card card-rounded"><div class="card-body py-3"><p class="statistics-title mb-1">Online</p><h3 id="cOnline">0</h3></div></div></div>
+          <div class="col-4"><div class="card card-rounded"><div class="card-body py-3"><p class="statistics-title mb-1">On a trip</p><h3 id="cBusy">0</h3></div></div></div>
+          <div class="col-4"><div class="card card-rounded"><div class="card-body py-3"><p class="statistics-title mb-1">Open loads</p><h3 id="cOpen">0</h3></div></div></div>
+        </div>
+        <div class="card card-rounded"><div class="card-body p-2"><div id="map" style="height:68vh;border-radius:12px"></div></div></div>
+        <p class="text-muted small mt-2">Blue trucks are free, orange trucks are on a trip. Red dots are open loads; rings show how far the driver search has expanded.</p>
+      </div>
+      <th:block th:replace="~{admin/fragments :: footer}"></th:block>
+    </div>
+  </div>
+</div>
+<th:block th:replace="~{admin/fragments :: scripts}"></th:block>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@stomp/stompjs@7.0.0/bundles/stomp.umd.min.js"></script>
+<script>
+  const map = L.map('map').setView([-19.0, 29.8], 7);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 18, attribution: '&copy; OpenStreetMap' }).addTo(map);
+  const truckIcon = (busy) => L.divIcon({ className: '', html: '<div class="hm-pin ' + (busy ? 'busy' : 'free') + '"><i class="mdi mdi-truck"></i></div>', iconSize: [30, 30] });
+  const markers = {}, loadLayer = L.layerGroup().addTo(map);
+  function upsert(d) {
+    const ll = [d.lat, d.lng];
+    if (markers[d.driverId]) markers[d.driverId].setLatLng(ll).setIcon(truckIcon(d.busy || d.loadId));
+    else markers[d.driverId] = L.marker(ll, { icon: truckIcon(d.busy) }).addTo(map);
+    markers[d.driverId].bindPopup('<b>' + (d.name || ('Driver #' + d.driverId)) + '</b><br>' + (d.truckClass || '') +
+      (d.loadId ? '<br><a href="/admin/loads/' + d.loadId + '">Track load #' + d.loadId + '</a> &middot; ETA ' + d.etaMinutes + ' min' : ''));
+  }
+  async function refresh() {
+    const r = await fetch('/admin/api/live'); const j = await r.json();
+    j.drivers.forEach(upsert);
+    loadLayer.clearLayers();
+    j.openLoads.forEach(l => {
+      L.circleMarker([l.lat, l.lng], { radius: 8, color: '#F95F53', fillOpacity: .8 }).addTo(loadLayer)
+        .bindPopup('<a href="/admin/loads/' + l.id + '">' + l.ref + '</a><br>to ' + l.to + '<br>$' + l.price + ' &middot; ' + l.truckClass);
+      if (l.radius) L.circle([l.lat, l.lng], { radius: l.radius * 1000, color: '#F95F53', weight: 1, fillOpacity: .03 }).addTo(loadLayer);
+    });
+    document.getElementById('cOnline').textContent = j.drivers.length;
+    document.getElementById('cBusy').textContent = j.drivers.filter(d => d.busy).length;
+    document.getElementById('cOpen').textContent = j.openLoads.length;
+  }
+  refresh(); setInterval(refresh, 30000);
+  // Live positions pushed over WebSocket; full refresh every 30 s as a fallback
+  fetch('/admin/api/ws-token').then(r => r.json()).then(({ token }) => {
+    if (!window.StompJs) return;
+    const c = new StompJs.Client({ brokerURL: (location.protocol === 'https:' ? 'wss://' : 'ws://') + location.host + '/ws',
+      connectHeaders: { Authorization: 'Bearer ' + token }, reconnectDelay: 5000 });
+    c.onConnect = () => c.subscribe('/topic/admin/live', m => upsert(JSON.parse(m.body)));
+    c.activate();
+  });
+</script>
+</body>
+</html>

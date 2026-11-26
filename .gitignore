@@ -1,0 +1,25 @@
+# .env IS committed on purpose (private repo); Jenkins deploys with it (same as MRPCZ).
+*.env
+!.env
+!.env.example
+secrets/*.json
+data/
+__pycache__/
+*.pyc
+.idea/
+_to_delete/
+target/
+# Flutter build output
+mobile/build/
+mobile/.dart_tool/
+mobile/android/app/google-services.json.bak
+*.iml
+*.apk
+*.log
+.gradle/
+mobile/android/.gradle/
+mobile/android/local.properties
+mobile/android/app/release/
+mobile/.flutter-plugins
+mobile/.flutter-plugins-dependencies
+mobile/ios/Pods/

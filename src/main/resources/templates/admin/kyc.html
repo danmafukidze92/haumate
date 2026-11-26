@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{admin/fragments :: head('KYC review')}"></head>
+<body>
+<div class="container-scroller">
+  <nav th:replace="~{admin/fragments :: navbar}"></nav>
+  <div class="container-fluid page-body-wrapper">
+    <nav th:replace="~{admin/fragments :: sidebar}"></nav>
+    <div class="main-panel">
+      <div class="content-wrapper">
+        <div th:replace="~{admin/fragments :: flash}"></div>
+        <div class="d-flex flex-wrap gap-2 mb-3">
+          <a th:each="st : ${T(zw.haulmate.domain.Types.KycStatus).values()}" th:href="@{/admin/kyc(status=${st})}"
+             class="btn btn-sm" th:classappend="${st == status} ? 'btn-primary text-white' : 'btn-outline-primary'" th:text="${st}"></a>
+        </div>
+        <div class="card card-rounded"><div class="card-body">
+          <h4 class="card-title card-title-dash">Verification queue</h4>
+          <div class="table-responsive"><table class="table">
+            <thead><tr><th>Name</th><th>Role</th><th>Phone</th><th>ID number</th><th>Registered</th><th></th></tr></thead>
+            <tbody>
+              <tr th:each="u : ${people}">
+                <td th:text="${u.fullName}"></td><td th:text="${u.role}"></td><td th:text="${u.phone}"></td>
+                <td th:text="${u.nationalIdNumber}"></td>
+                <td th:text="${#temporals.format(u.createdAt.atZone(T(java.time.ZoneId).of('Africa/Harare')), 'dd MMM yyyy HH:mm')}"></td>
+                <td><a class="btn btn-sm btn-primary text-white" th:href="@{/admin/kyc/{id}(id=${u.id})}">Review</a></td>
+              </tr>
+              <tr th:if="${#lists.isEmpty(people)}"><td colspan="6" class="text-muted">Nobody in this list.</td></tr>
+            </tbody>
+          </table></div>
+        </div></div>
+      </div>
+      <th:block th:replace="~{admin/fragments :: footer}"></th:block>
+    </div>
+  </div>
+</div>
+<th:block th:replace="~{admin/fragments :: scripts}"></th:block>
+
+</body>
+</html>

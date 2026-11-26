@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:fragment="head(title)">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="theme-color" content="#1F3BB3">
+  <title th:text="${title} + ' | HaulMate Admin'">HaulMate Admin</title>
+  <link rel="manifest" href="/manifest.webmanifest">
+  <link rel="stylesheet" href="/assets/vendors/feather/feather.css">
+  <link rel="stylesheet" href="/assets/vendors/mdi/css/materialdesignicons.min.css">
+  <link rel="stylesheet" href="/assets/vendors/ti-icons/css/themify-icons.css">
+  <link rel="stylesheet" href="/assets/vendors/typicons/typicons.css">
+  <link rel="stylesheet" href="/assets/vendors/simple-line-icons/css/simple-line-icons.css">
+  <link rel="stylesheet" href="/assets/vendors/css/vendor.bundle.base.css">
+  <link rel="stylesheet" href="/assets/css/style.css">
+  <link rel="stylesheet" href="/assets/css/haulmate.css">
+  <link rel="shortcut icon" href="/assets/images/favicon.png">
+</head>
+<body>
+
+<nav th:fragment="navbar" class="navbar default-layout col-lg-12 col-12 p-0 fixed-top d-flex align-items-top flex-row">
+  <div class="text-center navbar-brand-wrapper d-flex align-items-center justify-content-start">
+    <div class="me-3">
+      <button class="navbar-toggler navbar-toggler align-self-center" type="button" data-bs-toggle="minimize"><span class="icon-menu"></span></button>
+    </div>
+    <div>
+      <a class="navbar-brand brand-logo hm-brand" href="/admin"><i class="mdi mdi-truck-fast"></i> Haul<b>Mate</b></a>
+      <a class="navbar-brand brand-logo-mini hm-brand" href="/admin"><i class="mdi mdi-truck-fast"></i></a>
+    </div>
+  </div>
+  <div class="navbar-menu-wrapper d-flex align-items-top">
+    <ul class="navbar-nav">
+      <li class="nav-item fw-semibold d-none d-lg-block ms-0">
+        <h1 class="welcome-text">Hello, <span class="text-black fw-bold" th:text="${adminName}">Admin</span></h1>
+        <h3 class="welcome-sub-text">Freight marketplace control centre</h3>
+      </li>
+    </ul>
+    <ul class="navbar-nav ms-auto">
+      <li class="nav-item d-none d-md-block">
+        <span class="badge" th:classappend="${paynowMode == 'LIVE'} ? 'bg-success' : 'bg-warning text-dark'"
+              th:text="'Paynow ' + ${paynowMode}">Paynow TEST</span>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link count-indicator" href="/admin/kyc" title="Pending verifications">
+          <i class="icon-bell"></i><span class="count" th:if="${pendingKyc > 0}"></span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <form th:action="@{/admin/logout}" method="post" class="m-0"><button class="btn btn-sm btn-outline-primary">Logout</button></form>
+      </li>
+    </ul>
+    <button class="navbar-toggler navbar-toggler-right d-lg-none align-self-center" type="button" data-bs-toggle="offcanvas"><span class="mdi mdi-menu"></span></button>
+  </div>
+</nav>
+
+<nav th:fragment="sidebar" class="sidebar sidebar-offcanvas" id="sidebar">
+  <ul class="nav">
+    <li class="nav-item" th:classappend="${page == 'dashboard'} ? 'active'"><a class="nav-link" href="/admin"><i class="mdi mdi-grid-large menu-icon"></i><span class="menu-title">Dashboard</span></a></li>
+    <li class="nav-item" th:classappend="${page == 'map'} ? 'active'"><a class="nav-link" href="/admin/map"><i class="mdi mdi-map-marker-radius menu-icon"></i><span class="menu-title">Live map</span></a></li>
+    <li class="nav-item nav-category">Operations</li>
+    <li class="nav-item" th:classappend="${page == 'loads'} ? 'active'"><a class="nav-link" href="/admin/loads"><i class="mdi mdi-package-variant-closed menu-icon"></i><span class="menu-title">Loads &amp; trips</span></a></li>
+    <li class="nav-item" th:classappend="${page == 'kyc'} ? 'active'"><a class="nav-link" href="/admin/kyc"><i class="mdi mdi-account-check menu-icon"></i><span class="menu-title">KYC review</span>
+      <span class="badge bg-danger ms-auto" th:if="${pendingKyc > 0}" th:text="${pendingKyc}">0</span></a></li>
+    <li class="nav-item" th:classappend="${page == 'users'} ? 'active'"><a class="nav-link" href="/admin/users"><i class="mdi mdi-account-group menu-icon"></i><span class="menu-title">Users &amp; fleets</span></a></li>
+    <li class="nav-item nav-category">Finance</li>
+    <li class="nav-item" th:classappend="${page == 'payments'} ? 'active'"><a class="nav-link" href="/admin/payments"><i class="mdi mdi-cash-multiple menu-icon"></i><span class="menu-title">Payments</span></a></li>
+    <li class="nav-item" th:classappend="${page == 'settings'} ? 'active'"><a class="nav-link" href="/admin/settings"><i class="mdi mdi-cog menu-icon"></i><span class="menu-title">Settings &amp; Paynow</span></a></li>
+    <li class="nav-item nav-category">Developers</li>
+    <li class="nav-item"><a class="nav-link" href="/api/docs" target="_blank"><i class="mdi mdi-api menu-icon"></i><span class="menu-title">API docs</span></a></li>
+  </ul>
+</nav>
+
+<div th:fragment="flash">
+  <div class="alert alert-success" th:if="${msg}" th:text="${msg}"></div>
+  <div class="alert alert-danger" th:if="${err}" th:text="${err}"></div>
+</div>
+
+<th:block th:fragment="footer">
+  <footer class="footer">
+    <div class="d-sm-flex justify-content-center justify-content-sm-between">
+      <span class="text-muted text-center text-sm-left d-block d-sm-inline-block">HaulMate &middot; Zimbabwe freight marketplace</span>
+      <span class="float-none float-sm-end d-block mt-1 mt-sm-0 text-center">UI based on StarAdmin 2 by BootstrapDash</span>
+    </div>
+  </footer>
+</th:block>
+
+<th:block th:fragment="scripts">
+  <script src="/assets/vendors/js/vendor.bundle.base.js"></script>
+  <script src="/assets/js/off-canvas.js"></script>
+  <script src="/assets/js/template.js"></script>
+  <script src="/assets/js/hoverable-collapse.js"></script>
+  <script>if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js');</script>
+</th:block>
+</body>
+</html>

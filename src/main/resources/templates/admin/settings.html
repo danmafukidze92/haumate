@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{admin/fragments :: head('Settings')}"></head>
+<body>
+<div class="container-scroller">
+  <nav th:replace="~{admin/fragments :: navbar}"></nav>
+  <div class="container-fluid page-body-wrapper">
+    <nav th:replace="~{admin/fragments :: sidebar}"></nav>
+    <div class="main-panel">
+      <div class="content-wrapper">
+        <div th:replace="~{admin/fragments :: flash}"></div>
+        <form th:action="@{/admin/settings}" method="post">
+        <div class="row">
+          <div class="col-lg-6 grid-margin"><div class="card card-rounded"><div class="card-body">
+            <h4 class="card-title">Paynow integration</h4>
+            <p class="card-description">Keys are encrypted at rest. Leave a key blank to keep the saved one. Result URL for Paynow:
+              <code th:text="${@environment.getProperty('haulmate.public-base-url')} + '/api/payments/paynow/result'"></code></p>
+            <div class="form-group">
+              <label>Active mode</label>
+              <select id="paynowMode" name="s.paynow.mode" class="form-select">
+                <option value="TEST" th:selected="${s['paynow.mode'].value == 'TEST'}">TEST (sandbox, no real money)</option>
+                <option value="LIVE" th:selected="${s['paynow.mode'].value == 'LIVE'}">LIVE (real payments)</option>
+              </select>
+            </div>
+            <div id="box-test" class="hm-cred">
+              <h6>Test credentials</h6>
+              <div class="form-group"><label>Integration ID</label><input class="form-control" name="s.paynow.test.integration_id" th:value="${s['paynow.test.integration_id'].value}"></div>
+              <div class="form-group"><label>Integration key</label><input class="form-control" type="password" autocomplete="new-password" name="s.paynow.test.integration_key"
+                  th:placeholder="${#strings.isEmpty(s['paynow.test.integration_key'].value)} ? 'not set' : 'saved (enter a new key to replace it)'"></div>
+              <div class="form-group"><label>Merchant email (required by Paynow in test mode)</label><input class="form-control" name="s.paynow.test.auth_email" th:value="${s['paynow.test.auth_email'].value}"></div>
+            </div>
+            <div id="box-live" class="hm-cred">
+              <h6>Live credentials</h6>
+              <div class="form-group"><label>Integration ID</label><input class="form-control" name="s.paynow.live.integration_id" th:value="${s['paynow.live.integration_id'].value}"></div>
+              <div class="form-group"><label>Integration key</label><input class="form-control" type="password" autocomplete="new-password" name="s.paynow.live.integration_key"
+                  th:placeholder="${#strings.isEmpty(s['paynow.live.integration_key'].value)} ? 'not set' : 'saved (enter a new key to replace it)'"></div>
+              <div class="form-group"><label>Merchant email</label><input class="form-control" name="s.paynow.live.auth_email" th:value="${s['paynow.live.auth_email'].value}"></div>
+            </div>
+            <div class="form-group"><label>Platform commission (%)</label><input class="form-control" name="s.commission.percent" th:value="${s['commission.percent'].value}"></div>
+          </div></div></div>
+
+          <div class="col-lg-6 grid-margin"><div class="card card-rounded"><div class="card-body">
+            <h4 class="card-title">Price recommendation</h4>
+            <p class="card-description">Per class: <code>base fee, rate per km, toll per gate</code> in USD.</p>
+            <div class="form-group" th:each="c : ${classes}">
+              <label th:text="${c.label}"></label>
+              <input class="form-control" th:name="'s.pricing.' + ${c.name()}" th:value="${s['pricing.' + c.name()].value}">
+            </div>
+            <div class="row">
+              <div class="col-6 form-group"><label>Diesel now ($/L)</label><input class="form-control" name="s.pricing.current_diesel" th:value="${s['pricing.current_diesel'].value}"></div>
+              <div class="col-6 form-group"><label>Diesel reference ($/L)</label><input class="form-control" name="s.pricing.reference_diesel" th:value="${s['pricing.reference_diesel'].value}"></div>
+              <div class="col-6 form-group"><label>Empty-return factor (&gt;150 km)</label><input class="form-control" name="s.pricing.empty_return_factor" th:value="${s['pricing.empty_return_factor'].value}"></div>
+              <div class="col-6 form-group"><label>Km per toll gate</label><input class="form-control" name="s.pricing.km_per_toll_gate" th:value="${s['pricing.km_per_toll_gate'].value}"></div>
+              <div class="col-6 form-group"><label>Road factor (no OSRM)</label><input class="form-control" name="s.pricing.road_factor" th:value="${s['pricing.road_factor'].value}"></div>
+              <div class="col-6 form-group"><label>Surcharge hazardous</label><input class="form-control" name="s.pricing.surcharge.hazardous" th:value="${s['pricing.surcharge.hazardous'].value}"></div>
+              <div class="col-6 form-group"><label>Surcharge fragile</label><input class="form-control" name="s.pricing.surcharge.fragile" th:value="${s['pricing.surcharge.fragile'].value}"></div>
+              <div class="col-6 form-group"><label>Surcharge refrigerated</label><input class="form-control" name="s.pricing.surcharge.refrigerated" th:value="${s['pricing.surcharge.refrigerated'].value}"></div>
+              <div class="col-6 form-group"><label>Surcharge urgent</label><input class="form-control" name="s.pricing.surcharge.urgent" th:value="${s['pricing.surcharge.urgent'].value}"></div>
+            </div>
+          </div></div></div>
+
+          <div class="col-lg-6 grid-margin"><div class="card card-rounded"><div class="card-body">
+            <h4 class="card-title">Driver matching &amp; routing</h4>
+            <div class="form-group"><label>Search radius steps (km)</label><input class="form-control" name="s.matching.radius_steps_km" th:value="${s['matching.radius_steps_km'].value}"></div>
+            <div class="form-group"><label>Seconds before widening the search</label><input class="form-control" name="s.matching.step_seconds" th:value="${s['matching.step_seconds'].value}"></div>
+            <div class="form-group"><label>OSRM URL (optional, self-hosted road routing)</label><input class="form-control" name="s.routing.osrm_url" th:value="${s['routing.osrm_url'].value}" placeholder="http://osrm:5000"></div>
+            <div class="form-group"><label>Average truck speed (km/h)</label><input class="form-control" name="s.routing.avg_speed_kmh" th:value="${s['routing.avg_speed_kmh'].value}"></div>
+          </div></div></div>
+
+          <div class="col-lg-6 grid-margin"><div class="card card-rounded"><div class="card-body">
+            <h4 class="card-title">KYC &amp; voice calls</h4>
+            <div class="form-group"><label>Auto-approve when all checks pass</label>
+              <select class="form-select" name="s.kyc.auto_approve"><option value="false" th:selected="${s['kyc.auto_approve'].value == 'false'}">No, an admin approves</option>
+                <option value="true" th:selected="${s['kyc.auto_approve'].value == 'true'}">Yes</option></select></div>
+            <div class="form-group"><label>Face match threshold (cosine, SFace)</label><input class="form-control" name="s.kyc.face_match_threshold" th:value="${s['kyc.face_match_threshold'].value}"></div>
+            <div class="form-group"><label>STUN URL</label><input class="form-control" name="s.webrtc.stun_url" th:value="${s['webrtc.stun_url'].value}"></div>
+            <div class="form-group"><label>TURN URL</label><input class="form-control" name="s.webrtc.turn_url" th:value="${s['webrtc.turn_url'].value}" placeholder="turn:turn.yourdomain.co.zw:3478"></div>
+            <div class="row"><div class="col-6 form-group"><label>TURN username</label><input class="form-control" name="s.webrtc.turn_username" th:value="${s['webrtc.turn_username'].value}"></div>
+              <div class="col-6 form-group"><label>TURN password</label><input class="form-control" type="password" autocomplete="new-password" name="s.webrtc.turn_password" placeholder="unchanged"></div></div>
+          </div></div></div>
+        </div>
+        <div class="d-flex gap-2 mb-4">
+          <button class="btn btn-primary text-white">Save settings</button>
+        </div>
+        </form>
+        <div class="card card-rounded mb-4"><div class="card-body">
+          <h4 class="card-title">Mobile apps (download page)</h4>
+          <form th:action="@{/admin/settings}" method="post" class="row">
+            <div class="col-md-5 form-group"><label>Google Play link</label><input class="form-control" name="s.app.android_url" th:value="${s['app.android_url']?.value}" placeholder="https://play.google.com/store/apps/details?id=zw.haulmate.haulmate_app"></div>
+            <div class="col-md-5 form-group"><label>App Store link</label><input class="form-control" name="s.app.ios_url" th:value="${s['app.ios_url']?.value}" placeholder="https://apps.apple.com/..."></div>
+            <div class="col-md-2 form-group d-flex align-items-end"><button class="btn btn-primary text-white w-100">Save links</button></div>
+          </form>
+          <form th:action="@{/admin/settings/apk}" method="post" enctype="multipart/form-data" class="row mt-2">
+            <div class="col-md-5 form-group"><label>Direct APK download (build/app/outputs/flutter-apk/app-release.apk)</label><input type="file" accept=".apk" class="form-control" name="apk" required></div>
+            <div class="col-md-3 form-group"><label>Version</label><input class="form-control" name="version" th:value="${s['app.latest_version']?.value}"></div>
+            <div class="col-md-2 form-group d-flex align-items-end"><button class="btn btn-outline-primary w-100">Upload APK</button></div>
+          </form>
+          <p class="small text-muted mb-0">Public download page: <a href="/" target="_blank">/</a></p>
+        </div></div>
+        <form th:action="@{/admin/settings/paynow-test}" method="post"><button class="btn btn-outline-primary btn-sm">Check active Paynow credentials</button></form>
+      </div>
+      <th:block th:replace="~{admin/fragments :: footer}"></th:block>
+    </div>
+  </div>
+</div>
+<th:block th:replace="~{admin/fragments :: scripts}"></th:block>
+<script>
+  // Highlight which credential block is active
+  const sel = document.getElementById('paynowMode');
+  const sync = () => { document.getElementById('box-test').classList.toggle('hm-active', sel.value === 'TEST');
+                       document.getElementById('box-live').classList.toggle('hm-active', sel.value === 'LIVE'); };
+  sel.addEventListener('change', sync); sync();
+</script>
+</body>
+</html>

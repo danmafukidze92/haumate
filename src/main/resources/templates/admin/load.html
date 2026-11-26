@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{admin/fragments :: head('Load')}"></head>
+<body>
+<div class="container-scroller">
+  <nav th:replace="~{admin/fragments :: navbar}"></nav>
+  <div class="container-fluid page-body-wrapper">
+    <nav th:replace="~{admin/fragments :: sidebar}"></nav>
+    <div class="main-panel">
+      <div class="content-wrapper">
+        <div th:replace="~{admin/fragments :: flash}"></div>
+        <div class="row">
+          <div class="col-lg-5 grid-margin"><div class="card card-rounded"><div class="card-body">
+            <h4 class="card-title"><span th:text="${l.ref}"></span> <span class="badge hm-status" th:classappend="'st-' + ${l.status}" th:text="${l.status}"></span></h4>
+            <p class="mb-1"><b>From:</b> <span th:text="${l.pickupAddress}"></span></p>
+            <p class="mb-1"><b>To:</b> <span th:text="${l.dropoffAddress}"></span> (<span th:text="${l.distanceKm}"></span> km)</p>
+            <p class="mb-1"><b>Cargo:</b> <span th:text="${l.cargoType} + ', ' + ${l.weightTonnes} + ' t'"></span> &middot; <span th:text="${l.truckClass}"></span>
+              <span th:if="${l.hazardous}" class="badge bg-danger">hazardous</span><span th:if="${l.fragile}" class="badge bg-warning text-dark">fragile</span>
+              <span th:if="${l.refrigerated}" class="badge bg-info">cold</span><span th:if="${l.urgent}" class="badge bg-dark">urgent</span></p>
+            <p class="mb-1" th:if="${l.cargoDescription}" th:text="${l.cargoDescription}"></p>
+            <p class="mb-1"><b>Shipper:</b> <span th:text="${shipper?.fullName}"></span> <span th:text="${shipper?.phone}"></span></p>
+            <p class="mb-1"><b>Driver:</b> <span th:text="${driver != null} ? ${driver.fullName} + ' ' + ${driver.phone} : 'not assigned'"></span></p>
+            <p class="mb-1"><b>Price:</b> recommended $<span th:text="${l.recommendedPrice}"></span>, offered $<span th:text="${l.offeredPrice}"></span>,
+              agreed <span th:text="${l.agreedPrice != null} ? '$' + ${l.agreedPrice} : '-'"></span></p>
+            <p class="mb-1"><b>Payment:</b> <span th:text="${l.paymentMethod}"></span> <span class="badge" th:classappend="${l.paid} ? 'bg-success' : 'bg-secondary'" th:text="${l.paid} ? 'paid' : 'unpaid'"></span></p>
+            <p class="mb-1"><b>Search:</b> <span th:text="${l.driversAlerted}"></span> drivers alerted within <span th:text="${l.searchRadiusKm}"></span> km</p>
+            <p class="mb-1" th:if="${l.etaPickupMinutes}"><b>ETA to pickup:</b> <span th:text="${l.etaPickupMinutes}"></span> min</p>
+            <p class="mb-1" th:if="${l.cancelReason}"><b>Cancelled:</b> <span th:text="${l.cancelReason}"></span></p>
+            <div class="d-flex gap-2 mt-2">
+              <a th:if="${l.pickupPhoto}" th:href="@{/admin/files(path=${l.pickupPhoto})}" target="_blank" class="btn btn-sm btn-outline-primary">Pickup photo</a>
+              <a th:if="${l.deliveryPhoto}" th:href="@{/admin/files(path=${l.deliveryPhoto})}" target="_blank" class="btn btn-sm btn-outline-primary">Proof of delivery</a>
+            </div>
+          </div></div></div>
+          <div class="col-lg-7 grid-margin"><div class="card card-rounded"><div class="card-body p-2"><div id="loadMap" style="height:360px;border-radius:12px"></div></div></div></div>
+        </div>
+        <div class="row">
+          <div class="col-lg-6 grid-margin"><div class="card card-rounded"><div class="card-body">
+            <h4 class="card-title">Offers</h4>
+            <table class="table table-sm"><thead><tr><th>Driver</th><th>Amount</th><th>Away</th><th>Status</th></tr></thead>
+              <tbody><tr th:each="o : ${offers}"><td th:text="${names[o.driverId]}"></td>
+                <td><span th:text="'$' + ${o.amount}"></span> <span th:if="${o.counter}" class="badge bg-warning text-dark">counter</span></td>
+                <td th:text="${o.distanceToPickupKm != null} ? ${o.distanceToPickupKm} + ' km / ' + ${o.etaMinutes} + ' min' : '-'"></td>
+                <td th:text="${o.status}"></td></tr>
+                <tr th:if="${#lists.isEmpty(offers)}"><td colspan="4" class="text-muted">No offers yet</td></tr></tbody></table>
+            <h4 class="card-title mt-4">Payments</h4>
+            <table class="table table-sm"><tbody><tr th:each="p : ${payments}"><td th:text="${p.reference}"></td><td th:text="${p.method}"></td>
+              <td th:text="'$' + ${p.amount}"></td><td th:text="${p.status} + (${p.released} ? ' / released' : '')"></td></tr></tbody></table>
+          </div></div></div>
+          <div class="col-lg-6 grid-margin"><div class="card card-rounded"><div class="card-body">
+            <h4 class="card-title">Chat log</h4>
+            <div class="hm-chat">
+              <div th:each="c : ${chat}" class="hm-msg" th:classappend="${c.senderId == null} ? 'sys' : (${c.senderId == l.shipperId} ? 'left' : 'right')">
+                <small class="text-muted" th:text="${c.senderId != null} ? ${names[c.senderId]} : 'System'"></small>
+                <div th:text="${c.body}"></div>
+              </div>
+              <p class="text-muted" th:if="${#lists.isEmpty(chat)}">No messages.</p>
+            </div>
+          </div></div></div>
+        </div>
+      </div>
+      <th:block th:replace="~{admin/fragments :: footer}"></th:block>
+    </div>
+  </div>
+</div>
+<th:block th:replace="~{admin/fragments :: scripts}"></th:block>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@stomp/stompjs@7.0.0/bundles/stomp.umd.min.js"></script>
+<script th:inline="javascript">
+  const L0 = /*[[${l}]]*/ {};
+  const map = L.map('loadMap');
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '&copy; OpenStreetMap' }).addTo(map);
+  const a = [L0.pickupLat, L0.pickupLng], b = [L0.dropoffLat, L0.dropoffLng];
+  L.marker(a).addTo(map).bindPopup('Pickup'); L.marker(b).addTo(map).bindPopup('Drop-off');
+  map.fitBounds([a, b], { padding: [30, 30] });
+  const trail = L.polyline([], { color: '#1F3BB3', weight: 4 }).addTo(map);
+  const truckIcon = L.divIcon({ className: '', html: '<div class="hm-pin busy"><i class="mdi mdi-truck"></i></div>', iconSize: [30, 30] });
+  let truck = null;
+  const info = L.control({ position: 'topright' });
+  info.onAdd = () => { const d = L.DomUtil.create('div', 'card p-2 shadow-sm'); d.id = 'liveInfo'; d.style.minWidth = '170px';
+    d.innerHTML = '<small class="text-muted">Waiting for driver location...</small>'; return d; };
+  info.addTo(map);
+  function moveTruck(lat, lng, follow) {
+    const ll = [lat, lng];
+    if (truck) truck.setLatLng(ll); else truck = L.marker(ll, { icon: truckIcon, zIndexOffset: 1000 }).addTo(map);
+    trail.addLatLng(ll);
+    if (follow && !map.getBounds().pad(-0.1).contains(ll)) map.panTo(ll);
+  }
+  function showInfo(d) {
+    const el = document.getElementById('liveInfo'); if (!el) return;
+    const t = d.target === 'pickup' ? 'to pickup' : 'to drop-off';
+    el.innerHTML = '<span class="badge bg-success mb-1">LIVE</span><br>' +
+      (d.etaMinutes != null ? '<b>' + d.etaMinutes + ' min</b> ' + t + '<br>' : '') +
+      (d.remainingKm != null ? d.remainingKm + ' km left<br>' : '') +
+      (d.speedKmh != null ? Math.round(d.speedKmh) + ' km/h<br>' : '') +
+      '<small class="text-muted">' + new Date().toLocaleTimeString() + '</small>';
+  }
+  fetch('/admin/api/trail/' + L0.id).then(r => r.json()).then(t => {
+    t.forEach(p => trail.addLatLng([p.lat, p.lng]));
+    if (t.length) { const p = t[t.length - 1]; moveTruck(p.lat, p.lng, false); trail.setLatLngs(t.map(p => [p.lat, p.lng]));
+      map.fitBounds(L.latLngBounds([a, b, [p.lat, p.lng]]), { padding: [30, 30] }); }
+  });
+  const liveStatuses = ['ASSIGNED', 'EN_ROUTE_PICKUP', 'AT_PICKUP', 'LOADED', 'IN_TRANSIT'];
+  if (liveStatuses.includes(String(L0.status))) {
+    fetch('/admin/api/ws-token').then(r => r.json()).then(({ token }) => {
+      if (!window.StompJs) return;
+      const c = new StompJs.Client({ brokerURL: (location.protocol === 'https:' ? 'wss://' : 'ws://') + location.host + '/ws',
+        connectHeaders: { Authorization: 'Bearer ' + token }, reconnectDelay: 5000 });
+      c.onConnect = () => {
+        c.subscribe('/topic/loads/' + L0.id + '/location', m => { const d = JSON.parse(m.body); moveTruck(d.lat, d.lng, true); showInfo(d); });
+        c.subscribe('/topic/loads/' + L0.id + '/status', m => { const d = JSON.parse(m.body);
+          if (d.status && !liveStatuses.includes(d.status)) location.reload(); });
+      };
+      c.activate();
+    });
+  }
+</script>
+</body>
+</html>

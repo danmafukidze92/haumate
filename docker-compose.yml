@@ -1,0 +1,24 @@
+# Local development only: Redis + Celery worker. Started automatically when the API boots
+# from IntelliJ (spring-boot-docker-compose), so no manual `docker compose up` is needed.
+# The database is the shared server (DB_URL in .env), same as MRPCZ.
+#   docker compose up -d --build
+services:
+  redis:
+    image: redis:7-alpine
+    container_name: haulmate-redis-dev
+    restart: unless-stopped
+    ports: ["6380:6379"]
+  worker:
+    build: ./worker
+    container_name: haulmate-worker-dev
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      CELERY_BROKER_URL: redis://redis:6379/0
+      REDIS_URL: redis://redis:6379/0
+      STORAGE_DIR: /app/data/uploads
+      FIREBASE_CREDENTIALS: /secrets/firebase.json
+    volumes:
+      - ./data/uploads:/app/data/uploads   # same folder IntelliJ writes KYC uploads to
+      - ./secrets:/secrets:ro
+    depends_on: [redis]

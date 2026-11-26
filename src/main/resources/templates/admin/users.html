@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{admin/fragments :: head('Users')}"></head>
+<body>
+<div class="container-scroller">
+  <nav th:replace="~{admin/fragments :: navbar}"></nav>
+  <div class="container-fluid page-body-wrapper">
+    <nav th:replace="~{admin/fragments :: sidebar}"></nav>
+    <div class="main-panel">
+      <div class="content-wrapper">
+        <div th:replace="~{admin/fragments :: flash}"></div>
+        <div class="card card-rounded"><div class="card-body">
+          <h4 class="card-title card-title-dash">Users &amp; fleets</h4>
+          <div class="table-responsive"><table class="table">
+            <thead><tr><th>Name</th><th>Role</th><th>Phone</th><th>KYC</th><th>Status</th><th>Rating</th><th>Wallet</th><th></th></tr></thead>
+            <tbody><tr th:each="u : ${list}">
+              <td><span th:text="${u.fullName}"></span><br><small class="text-muted" th:text="${u.companyName}"></small></td>
+              <td th:text="${u.role}"></td><td th:text="${u.phone}"></td>
+              <td><a th:href="@{/admin/kyc/{id}(id=${u.id})}" th:text="${u.kycStatus}"></a></td>
+              <td th:text="${u.status}"></td>
+              <td th:text="${u.ratingCount > 0} ? ${u.ratingAvg} + ' (' + ${u.ratingCount} + ')' : '-'"></td>
+              <td th:text="'$' + ${u.walletBalance}" th:classappend="${u.walletBalance < 0} ? 'text-danger'"></td>
+              <td>
+                <form th:if="${u.role.name() != 'ADMIN'}" th:action="@{/admin/users/{id}/status(id=${u.id})}" method="post" class="m-0">
+                  <input type="hidden" name="status" th:value="${u.status.name() == 'SUSPENDED'} ? 'ACTIVE' : 'SUSPENDED'">
+                  <button class="btn btn-sm" th:classappend="${u.status.name() == 'SUSPENDED'} ? 'btn-outline-success' : 'btn-outline-danger'"
+                          th:text="${u.status.name() == 'SUSPENDED'} ? 'Reinstate' : 'Suspend'"></button>
+                </form>
+              </td>
+            </tr></tbody>
+          </table></div>
+        </div></div>
+      </div>
+      <th:block th:replace="~{admin/fragments :: footer}"></th:block>
+    </div>
+  </div>
+</div>
+<th:block th:replace="~{admin/fragments :: scripts}"></th:block>
+
+</body>
+</html>

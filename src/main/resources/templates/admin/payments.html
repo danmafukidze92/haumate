@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{admin/fragments :: head('Payments')}"></head>
+<body>
+<div class="container-scroller">
+  <nav th:replace="~{admin/fragments :: navbar}"></nav>
+  <div class="container-fluid page-body-wrapper">
+    <nav th:replace="~{admin/fragments :: sidebar}"></nav>
+    <div class="main-panel">
+      <div class="content-wrapper">
+        <div th:replace="~{admin/fragments :: flash}"></div>
+        <div class="card card-rounded"><div class="card-body">
+          <h4 class="card-title card-title-dash">Payments</h4>
+          <div class="table-responsive"><table class="table">
+            <thead><tr><th>Reference</th><th>Load</th><th>Method</th><th>Mode</th><th>Amount</th><th>Commission</th><th>Status</th><th>Escrow</th><th></th></tr></thead>
+            <tbody><tr th:each="p : ${list}">
+              <td><span th:text="${p.reference}"></span><br><small class="text-muted" th:text="${p.paynowReference}"></small></td>
+              <td><a th:href="@{/admin/loads/{id}(id=${p.loadId})}" th:text="'#' + ${p.loadId}"></a></td>
+              <td th:text="${p.method}"></td>
+              <td><span class="badge" th:classappend="${p.mode == 'LIVE'} ? 'bg-success' : 'bg-warning text-dark'" th:text="${p.mode}"></span></td>
+              <td th:text="${p.currency} + ' ' + ${p.amount}"></td><td th:text="${p.commission}"></td>
+              <td><span th:text="${p.status}"></span><br><small class="text-danger" th:if="${p.rawStatus == 'REFUND_REQUIRED'}">refund required</small></td>
+              <td th:text="${p.released} ? 'released' : 'held'"></td>
+              <td><form th:action="@{/admin/payments/{id}/poll(id=${p.id})}" method="post" class="m-0"><button class="btn btn-sm btn-outline-primary">Check status</button></form></td>
+            </tr>
+            <tr th:if="${#lists.isEmpty(list)}"><td colspan="9" class="text-muted">No payments yet.</td></tr></tbody>
+          </table></div>
+        </div></div>
+      </div>
+      <th:block th:replace="~{admin/fragments :: footer}"></th:block>
+    </div>
+  </div>
+</div>
+<th:block th:replace="~{admin/fragments :: scripts}"></th:block>
+
+</body>
+</html>

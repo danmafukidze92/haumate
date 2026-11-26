@@ -1,0 +1,74 @@
+server:
+  port: ${PORT:8670}
+  forward-headers-strategy: framework
+
+spring:
+  application:
+    name: haulmate
+  config:
+    import: optional:file:.env[.properties]
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://pgadmin.nexigent-labs.co.zw:5432/haulmate}
+    username: ${DB_USERNAME:haulmate}
+    password: ${DB_PASSWORD}
+    driver-class-name: ${DB_DRIVER:org.postgresql.Driver}
+    hikari:
+      # Remote DB (pgadmin.nexigent-labs.co.zw): recycle connections before the server/firewall drops idle ones
+      maximum-pool-size: 10
+      minimum-idle: 2
+      max-lifetime: 240000        # 4 min
+      idle-timeout: 120000        # 2 min
+      keepalive-time: 60000       # ping every 60 s
+      connection-timeout: 15000
+      validation-timeout: 5000
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+    properties:
+      hibernate.jdbc.time_zone: UTC
+      hibernate.default_schema: ${DB_SCHEMA:haulmate}
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+  servlet:
+    multipart:
+      max-file-size: 150MB
+      max-request-size: 160MB
+  flyway:
+    enabled: true
+    schemas: ${DB_SCHEMA:haulmate}
+    default-schema: ${DB_SCHEMA:haulmate}
+    create-schemas: ${DB_CREATE:true}
+
+haulmate:
+  public-base-url: ${PUBLIC_BASE_URL:http://localhost:8670}
+  jwt-secret: ${JWT_SECRET:change-me-change-me-change-me-change-me-change-me-64}
+  jwt-ttl-hours: ${JWT_TTL_HOURS:720}
+  encryption-key: ${APP_ENCRYPTION_KEY:change-me-encryption-key}
+  storage-dir: ${STORAGE_DIR:./data/uploads}
+  admin:
+    phone: ${ADMIN_PHONE:+263770000000}
+    password: ${ADMIN_PASSWORD:Admin@12345}
+    name: ${ADMIN_NAME:Platform Admin}
+  celery:
+    queue: ${CELERY_QUEUE:celery}
+  events-channel: haulmate:events
+  embedded-redis: ${REDIS_EMBEDDED:true}   # local dev only; class is absent from the production jar
+  discovery:
+    enabled: ${DISCOVERY_ENABLED:true}   # phone finds this PC on Wi-Fi; off in Docker
+
+springdoc:
+  swagger-ui:
+    path: /api/docs
+
+management:
+  health:
+    redis:
+      # Off locally: the embedded Windows Redis returns INFO text Spring can't parse. Jenkins turns it on for the VPS.
+      enabled: ${REDIS_HEALTH_ENABLED:false}
+  endpoints:
+    web:
+      exposure:
+        include: health,info

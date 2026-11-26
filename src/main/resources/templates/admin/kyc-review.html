@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{admin/fragments :: head('KYC review')}"></head>
+<body>
+<div class="container-scroller">
+  <nav th:replace="~{admin/fragments :: navbar}"></nav>
+  <div class="container-fluid page-body-wrapper">
+    <nav th:replace="~{admin/fragments :: sidebar}"></nav>
+    <div class="main-panel">
+      <div class="content-wrapper">
+        <div th:replace="~{admin/fragments :: flash}"></div>
+        <div class="row">
+          <div class="col-lg-4 grid-margin"><div class="card card-rounded"><div class="card-body">
+            <h4 class="card-title" th:text="${u.fullName}"></h4>
+            <p class="mb-1"><b>Role:</b> <span th:text="${u.role}"></span></p>
+            <p class="mb-1"><b>Phone:</b> <span th:text="${u.phone}"></span></p>
+            <p class="mb-1"><b>KYC:</b> <span class="badge bg-info" th:text="${u.kycStatus}"></span></p>
+            <p class="mb-1"><b>ID number (OCR):</b> <span th:text="${u.nationalIdNumber ?: '-'}"></span></p>
+            <p class="mb-1"><b>Licence (OCR):</b> <span th:text="${u.licenceNumber ?: '-'}"></span> <span th:text="${u.licenceClass}"></span></p>
+            <hr>
+            <h6>Trucks</h6>
+            <form th:action="@{/admin/kyc/{id}/decide(id=${u.id})}" method="post">
+              <div class="form-check" th:each="t : ${trucks}">
+                <label class="form-check-label"><input type="checkbox" class="form-check-input" name="verifyTrucks" th:value="${t.id}" th:checked="${t.verified}">
+                  <span th:text="${t.regNumber} + ' - ' + ${t.make} + ' ' + ${t.model} + ' (' + ${t.truckClass} + ', ' + ${t.bodyType} + ')'"></span><i class="input-helper"></i></label>
+              </div>
+              <p class="text-muted small" th:if="${#lists.isEmpty(trucks)}">No trucks listed.</p>
+              <textarea name="note" class="form-control my-3" rows="3" placeholder="Note to the user (required when rejecting)"></textarea>
+              <div class="d-flex gap-2">
+                <button name="approve" value="true" class="btn btn-success text-white">Approve</button>
+                <button name="approve" value="false" class="btn btn-danger text-white">Reject</button>
+              </div>
+            </form>
+          </div></div></div>
+          <div class="col-lg-8">
+            <div class="row">
+              <div class="col-md-6 grid-margin" th:each="d : ${docs}">
+                <div class="card card-rounded h-100"><div class="card-body">
+                  <div class="d-flex justify-content-between align-items-center mb-2">
+                    <h6 class="mb-0" th:text="${d.docType}"></h6>
+                    <span class="badge" th:classappend="${d.status.name() == 'AUTO_PASSED' or d.status.name() == 'APPROVED'} ? 'bg-success' : (${d.status.name() == 'AUTO_FLAGGED' or d.status.name() == 'REJECTED'} ? 'bg-danger' : 'bg-secondary')" th:text="${d.status}"></span>
+                  </div>
+                  <a th:href="@{/admin/files(path=${d.filePath})}" target="_blank">
+                    <img th:src="@{/admin/files(path=${d.filePath})}" class="img-fluid rounded hm-doc" alt="document"></a>
+                  <p class="small mt-2 mb-1"><b>Capture:</b> <span th:text="${d.captureMode}"></span>
+                    <span th:if="${d.livenessChallenge}" th:text="' &middot; challenge ' + ${d.livenessChallenge}"></span></p>
+                  <p class="small mb-1" th:if="${d.faceMatchScore != null}"><b>Face match:</b> <span th:text="${#numbers.formatDecimal(d.faceMatchScore,1,2)}"></span></p>
+                  <p class="small mb-1" th:if="${d.livenessPassed != null}"><b>Liveness:</b> <span th:text="${d.livenessPassed} ? 'passed' : 'failed'"></span></p>
+                  <p class="small mb-1" th:if="${d.autoChecks}"><b>Checks:</b> <span th:text="${d.autoChecks}"></span></p>
+                  <details th:if="${d.extractedJson}"><summary class="small">Extracted fields</summary><pre class="small" th:text="${d.extractedJson}"></pre></details>
+                  <details th:if="${d.ocrText}"><summary class="small">OCR text</summary><pre class="small hm-ocr" th:text="${d.ocrText}"></pre></details>
+                </div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <th:block th:replace="~{admin/fragments :: footer}"></th:block>
+    </div>
+  </div>
+</div>
+<th:block th:replace="~{admin/fragments :: scripts}"></th:block>
+
+</body>
+</html>

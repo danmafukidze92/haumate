@@ -1,0 +1,35 @@
+name: haulmate_app
+description: HaulMate - book trucks (1-30 t) across Zimbabwe, or find loads as a driver.
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.4.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  dio: ^5.7.0
+  provider: ^6.1.2
+  flutter_secure_storage: ^11.2.0
+  stomp_dart_client: ^2.1.3
+  geolocator: ^14.1.1
+  flutter_map: ^8.3.2
+  latlong2: ^0.10.1
+  camera: ^0.12.1
+  image_picker: ^1.1.2
+  google_mlkit_face_detection: ^0.15.1
+  firebase_core: ^4.15.0
+  firebase_messaging: ^16.7.0
+  flutter_webrtc: ^1.6.2+hotfix.4
+  url_launcher: ^6.3.1
+  intl: ^0.20.3
+  permission_handler: ^13.0.2
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+
+flutter:
+  uses-material-design: true

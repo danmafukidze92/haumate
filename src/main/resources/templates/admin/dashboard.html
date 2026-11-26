@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{admin/fragments :: head('Dashboard')}"></head>
+<body>
+<div class="container-scroller">
+  <nav th:replace="~{admin/fragments :: navbar}"></nav>
+  <div class="container-fluid page-body-wrapper">
+    <nav th:replace="~{admin/fragments :: sidebar}"></nav>
+    <div class="main-panel">
+      <div class="content-wrapper">
+        <div th:replace="~{admin/fragments :: flash}"></div>
+        <div class="row">
+          <div class="col-sm-12">
+            <div class="statistics-details d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
+              <div><p class="statistics-title">Shippers</p><h3 class="rate-percentage" th:text="${shippers}">0</h3></div>
+              <div><p class="statistics-title">Drivers &amp; fleets</p><h3 class="rate-percentage" th:text="${drivers}">0</h3></div>
+              <div><p class="statistics-title">Drivers online</p><h3 class="rate-percentage text-success" th:text="${onlineDrivers}">0</h3></div>
+              <div><p class="statistics-title">Open loads</p><h3 class="rate-percentage" th:text="${openLoads}">0</h3></div>
+              <div><p class="statistics-title">Trips in progress</p><h3 class="rate-percentage" th:text="${activeTrips}">0</h3></div>
+              <div><p class="statistics-title">GMV, 30 days</p><h3 class="rate-percentage" th:text="'$' + ${#numbers.formatDecimal(gmv30,1,'COMMA',0,'POINT')}">$0</h3></div>
+              <div><p class="statistics-title">Commission, 30 days</p><h3 class="rate-percentage" th:text="'$' + ${#numbers.formatDecimal(commission30,1,'COMMA',0,'POINT')}">$0</h3></div>
+            </div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-lg-8 grid-margin stretch-card">
+            <div class="card card-rounded"><div class="card-body">
+              <h4 class="card-title card-title-dash">Loads, last 14 days</h4>
+              <div style="height:300px"><canvas id="loadsChart"></canvas></div>
+            </div></div>
+          </div>
+          <div class="col-lg-4 grid-margin stretch-card">
+            <div class="card card-rounded"><div class="card-body">
+              <h4 class="card-title card-title-dash">Loads by truck class</h4>
+              <ul class="list-group list-group-flush">
+                <li class="list-group-item d-flex justify-content-between" th:each="r : ${byClass}">
+                  <span th:text="${r.truck_class}"></span><b th:text="${r.n}"></b></li>
+                <li class="list-group-item text-muted" th:if="${#lists.isEmpty(byClass)}">No loads yet</li>
+              </ul>
+              <a href="/admin/kyc" class="btn btn-primary btn-sm mt-3" th:if="${pendingKyc > 0}" th:text="${pendingKyc} + ' people waiting for KYC review'"></a>
+            </div></div>
+          </div>
+        </div>
+        <div class="row"><div class="col-12 grid-margin"><div class="card card-rounded"><div class="card-body">
+          <h4 class="card-title card-title-dash">Latest loads</h4>
+          <div class="table-responsive"><table class="table select-table">
+            <thead><tr><th>Ref</th><th>Route</th><th>Class</th><th>Price</th><th>Status</th></tr></thead>
+            <tbody><tr th:each="l : ${recent}">
+              <td><a th:href="@{/admin/loads/{id}(id=${l.id})}" th:text="${l.ref}"></a></td>
+              <td><span th:text="${l.pickupAddress}"></span> &rarr; <span th:text="${l.dropoffAddress}"></span></td>
+              <td th:text="${l.truckClass}"></td>
+              <td th:text="${l.currency} + ' ' + ${l.agreedPrice != null ? l.agreedPrice : l.offeredPrice}"></td>
+              <td><span class="badge hm-status" th:classappend="'st-' + ${l.status}" th:text="${l.status}"></span></td>
+            </tr></tbody>
+          </table></div>
+        </div></div></div></div>
+      </div>
+      <th:block th:replace="~{admin/fragments :: footer}"></th:block>
+    </div>
+  </div>
+</div>
+<th:block th:replace="~{admin/fragments :: scripts}"></th:block>
+<script src="/assets/vendors/chart.js/chart.umd.js"></script>
+<script th:inline="javascript">
+  const days = /*[[${chartDays}]]*/ [], posted = /*[[${chartPosted}]]*/ [], delivered = /*[[${chartDelivered}]]*/ [];
+  new Chart(document.getElementById('loadsChart'), {
+    type: 'bar',
+    data: { labels: days, datasets: [
+      { label: 'Posted', data: posted, backgroundColor: '#1F3BB3', borderRadius: 4 },
+      { label: 'Delivered', data: delivered, backgroundColor: '#52CDFF', borderRadius: 4 } ] },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } },
+               scales: { y: { beginAtZero: true, ticks: { precision: 0 } }, x: { grid: { display: false } } } }
+  });
+</script>
+</body>
+</html>

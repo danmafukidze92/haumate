@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{admin/fragments :: head('Sign in')}"></head>
+<body>
+<div class="container-scroller">
+  <div class="container-fluid page-body-wrapper full-page-wrapper">
+    <div class="content-wrapper d-flex align-items-center auth px-0">
+      <div class="row w-100 mx-0">
+        <div class="col-lg-4 mx-auto">
+          <div class="auth-form-light text-left py-5 px-4 px-sm-5">
+            <div class="brand-logo hm-brand fs-3 mb-3"><i class="mdi mdi-truck-fast"></i> Haul<b>Mate</b></div>
+            <h4>Admin sign in</h4>
+            <h6 class="fw-light">Freight marketplace control centre</h6>
+            <div class="alert alert-danger mt-3" th:if="${param.error}">Wrong phone number or password.</div>
+            <div class="alert alert-info mt-3" th:if="${param.logout}">You have signed out.</div>
+            <form class="pt-3" th:action="@{/admin/login}" method="post">
+              <div class="form-group"><input name="phone" class="form-control form-control-lg" placeholder="Phone e.g. +263770000000" required></div>
+              <div class="form-group"><input name="password" type="password" class="form-control form-control-lg" placeholder="Password" required></div>
+              <div class="mt-3 d-grid gap-2"><button class="btn btn-block btn-primary btn-lg fw-medium auth-form-btn">SIGN IN</button></div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<th:block th:replace="~{admin/fragments :: scripts}"></th:block>
+</body>
+</html>

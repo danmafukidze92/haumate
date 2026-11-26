@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{admin/fragments :: head('Loads')}"></head>
+<body>
+<div class="container-scroller">
+  <nav th:replace="~{admin/fragments :: navbar}"></nav>
+  <div class="container-fluid page-body-wrapper">
+    <nav th:replace="~{admin/fragments :: sidebar}"></nav>
+    <div class="main-panel">
+      <div class="content-wrapper">
+        <div th:replace="~{admin/fragments :: flash}"></div>
+        <div class="d-flex flex-wrap gap-2 mb-3">
+          <a href="/admin/loads" class="btn btn-sm" th:classappend="${status == null} ? 'btn-primary text-white' : 'btn-outline-primary'">ALL</a>
+          <a th:each="st : ${statuses}" th:href="@{/admin/loads(status=${st})}" class="btn btn-sm"
+             th:classappend="${st == status} ? 'btn-primary text-white' : 'btn-outline-primary'" th:text="${st}"></a>
+        </div>
+        <div class="card card-rounded"><div class="card-body">
+          <div class="table-responsive"><table class="table">
+            <thead><tr><th>Ref</th><th>Shipper</th><th>Route</th><th>Cargo</th><th>Recommended</th><th>Offered / agreed</th><th>Driver</th><th>Status</th></tr></thead>
+            <tbody><tr th:each="l : ${list}">
+              <td><a th:href="@{/admin/loads/{id}(id=${l.id})}" th:text="${l.ref}"></a></td>
+              <td th:text="${names[l.shipperId]}"></td>
+              <td><span th:text="${l.pickupAddress}"></span> &rarr; <span th:text="${l.dropoffAddress}"></span><br><small class="text-muted" th:text="${l.distanceKm} + ' km'"></small></td>
+              <td><span th:text="${l.cargoType}"></span><br><small class="text-muted" th:text="${l.weightTonnes} + ' t, ' + ${l.truckClass}"></small></td>
+              <td th:text="'$' + ${l.recommendedPrice}"></td>
+              <td th:text="'$' + ${l.agreedPrice != null ? l.agreedPrice : l.offeredPrice}"></td>
+              <td th:text="${l.driverId != null} ? ${names[l.driverId]} : '-'"></td>
+              <td><span class="badge hm-status" th:classappend="'st-' + ${l.status}" th:text="${l.status}"></span></td>
+            </tr></tbody>
+          </table></div>
+        </div></div>
+      </div>
+      <th:block th:replace="~{admin/fragments :: footer}"></th:block>
+    </div>
+  </div>
+</div>
+<th:block th:replace="~{admin/fragments :: scripts}"></th:block>
+
+</body>
+</html>
