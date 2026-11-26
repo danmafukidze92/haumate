@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title th:text="${mode == 'signup'} ? 'Sign up · HaulMate' : 'Log in · HaulMate'">HaulMate</title>
+  <link rel="icon" href="/assets/images/favicon.png">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/assets/vendors/mdi/css/materialdesignicons.min.css">
+  <style>
+    :root{--ink:#0F1A3D;--navy:#14204F;--brand:#1F3BB3;--accent:#F95F53;--accent2:#FF8A4C;--muted:#5B6478;--line:#E4E8F2;--bg:#F5F7FC;--ok:#16A36A}
+    *{box-sizing:border-box}
+    body{margin:0;min-height:100vh;font-family:"Plus Jakarta Sans",system-ui,sans-serif;color:var(--ink);display:grid;grid-template-columns:1fr 1fr;background:#fff}
+    a{color:var(--brand);text-decoration:none}
+    .side{background:radial-gradient(900px 500px at 80% -10%,#2a3f9e 0%,transparent 60%),linear-gradient(160deg,#0F1A3D,#14204F 55%,#1b2b6b);color:#fff;padding:48px;display:flex;flex-direction:column;justify-content:space-between}
+    .logo{display:flex;align-items:center;gap:10px;font-weight:800;font-size:22px;color:#fff}
+    .logo i{display:grid;place-items:center;width:40px;height:40px;border-radius:11px;background:linear-gradient(135deg,var(--accent),var(--accent2));font-size:22px}
+    .logo b{color:var(--accent2)}
+    .side h2{font-size:40px;line-height:1.1;margin:0 0 16px;letter-spacing:-1px}.side h2 em{font-style:normal;color:var(--accent2)}
+    .side p{opacity:.8;line-height:1.6;max-width:440px}
+    .ticks{list-style:none;padding:0;margin:24px 0 0}.ticks li{display:flex;gap:10px;margin:10px 0;opacity:.9}.ticks i{color:var(--accent2)}
+    main{display:flex;align-items:center;justify-content:center;padding:40px 20px}
+    .card{width:100%;max-width:440px}
+    h1{font-size:30px;margin:0 0 6px;letter-spacing:-.5px}.sub{color:var(--muted);margin:0 0 26px}
+    label{display:block;font-weight:600;font-size:14px;margin:16px 0 6px}
+    input,select{width:100%;padding:13px 14px;border:1px solid var(--line);border-radius:12px;font:inherit;font-size:15px;background:#fff}
+    input:focus{outline:2px solid rgba(31,59,179,.25);border-color:var(--brand)}
+    .roles{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+    .role{border:1.5px solid var(--line);border-radius:14px;padding:14px 8px;text-align:center;cursor:pointer;font-size:13px;color:var(--muted)}
+    .role i{display:block;font-size:26px;color:var(--brand)}.role b{display:block;color:var(--ink);font-size:14px;margin:4px 0 2px}
+    .role.on{border-color:var(--brand);background:#EEF1FC}
+    .row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    .btn{width:100%;margin-top:24px;padding:15px;border:0;border-radius:14px;font:inherit;font-weight:700;font-size:16px;color:#fff;cursor:pointer;background:linear-gradient(135deg,var(--accent),var(--accent2));box-shadow:0 10px 24px rgba(249,95,83,.3)}
+    .btn:disabled{opacity:.6;cursor:wait}
+    .err{display:none;background:#FFECEB;color:#B3261E;border-radius:12px;padding:12px 14px;margin-top:16px;font-size:14px}
+    .alt{margin-top:22px;text-align:center;color:var(--muted)}
+    .chk{display:flex;gap:10px;align-items:flex-start;margin-top:16px;font-size:14px;color:var(--muted)}.chk input{width:auto;margin-top:3px}
+    .back{display:inline-flex;gap:6px;align-items:center;color:var(--muted);margin-bottom:28px;font-size:14px}
+    @media(max-width:860px){body{grid-template-columns:1fr}.side{display:none}}
+  </style>
+</head>
+<body>
+<aside class="side">
+  <a href="/" class="logo"><i class="mdi mdi-truck-fast"></i><span>Haul<b>Mate</b></span></a>
+  <div>
+    <h2>Move any load, <em>anywhere</em> in Zimbabwe.</h2>
+    <p>Post loads and track trucks live from your browser or the app. Drivers find paying loads near them and get paid on delivery.</p>
+    <ul class="ticks">
+      <li><i class="mdi mdi-check-circle"></i> Fair recommended prices, you set your offer</li>
+      <li><i class="mdi mdi-check-circle"></i> Verified drivers with ID and live selfie checks</li>
+      <li><i class="mdi mdi-check-circle"></i> Live GPS tracking and ETA on every trip</li>
+    </ul>
+  </div>
+  <small style="opacity:.6">© HaulMate Zimbabwe</small>
+</aside>
+<main>
+  <div class="card">
+    <a href="/" class="back"><i class="mdi mdi-arrow-left"></i> Back to home</a>
+
+    <!-- LOG IN -->
+    <form id="loginForm" th:if="${mode == 'login'}" autocomplete="on">
+      <h1>Welcome back</h1>
+      <p class="sub">Log in to your HaulMate panel.</p>
+      <label for="lPhone">Mobile number</label>
+      <input id="lPhone" name="phone" type="tel" placeholder="0771 234 567" required autocomplete="tel">
+      <label for="lPass">Password</label>
+      <input id="lPass" name="password" type="password" required autocomplete="current-password">
+      <div class="err" id="err"></div>
+      <button class="btn" type="submit">Log in</button>
+      <p class="alt">New to HaulMate? <a href="/signup">Create an account</a></p>
+    </form>
+
+    <!-- SIGN UP -->
+    <form id="signupForm" th:if="${mode == 'signup'}" autocomplete="on">
+      <h1>Create your account</h1>
+      <p class="sub">Free to join. Takes about a minute.</p>
+      <label>I want to</label>
+      <div class="roles">
+        <div class="role on" data-role="SHIPPER"><i class="mdi mdi-package-variant-closed"></i><b>Send goods</b>Post loads</div>
+        <div class="role" data-role="DRIVER"><i class="mdi mdi-truck"></i><b>Drive</b>Find loads</div>
+        <div class="role" data-role="FLEET_OWNER"><i class="mdi mdi-domain"></i><b>Fleet</b>Many trucks</div>
+      </div>
+      <label for="sName">Full name (as on your ID)</label>
+      <input id="sName" required autocomplete="name">
+      <div id="companyWrap" style="display:none"><label for="sCompany">Company name</label><input id="sCompany" autocomplete="organization"></div>
+      <label for="sPhone">Mobile number</label>
+      <input id="sPhone" type="tel" placeholder="0771 234 567" required autocomplete="tel">
+      <label for="sEmail">Email (optional)</label>
+      <input id="sEmail" type="email" autocomplete="email">
+      <div class="row">
+        <div><label for="sPass">Password</label><input id="sPass" type="password" minlength="8" required autocomplete="new-password"></div>
+        <div><label for="sPass2">Confirm</label><input id="sPass2" type="password" minlength="8" required autocomplete="new-password"></div>
+      </div>
+      <label class="chk"><input type="checkbox" id="sAgree" required> I agree to the <a href="/privacy" target="_blank">terms and privacy policy</a>, and to verify my identity with my ID and a live selfie.</label>
+      <div class="err" id="err"></div>
+      <button class="btn" type="submit">Create account</button>
+      <p class="alt">Already have an account? <a href="/login">Log in</a></p>
+    </form>
+  </div>
+</main>
+<script>
+  function showErr(m) { var e = document.getElementById('err'); e.textContent = m; e.style.display = 'block'; }
+  async function call(path, body) {
+    var r = await fetch(path, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+    var j = {}; try { j = await r.json(); } catch (e) {}
+    if (!r.ok) throw new Error(j.error || j.message || ('Something went wrong (' + r.status + ')'));
+    return j;
+  }
+  function done(res) {
+    if (res.user && res.user.role === 'ADMIN') { location.href = '/admin'; return; }
+    try { localStorage.setItem('hm_token', res.token); } catch (e) {}
+    location.href = '/account';
+  }
+  try { if (localStorage.getItem('hm_token')) location.replace('/account'); } catch (e) {}
+
+  var lf = document.getElementById('loginForm');
+  if (lf) lf.addEventListener('submit', async function (ev) {
+    ev.preventDefault(); var b = lf.querySelector('button'); b.disabled = true;
+    try { done(await call('/api/auth/login', { phone: lPhone.value, password: lPass.value })); }
+    catch (e) { showErr(e.message); b.disabled = false; }
+  });
+
+  var sf = document.getElementById('signupForm'), role = 'SHIPPER';
+  if (sf) {
+    document.querySelectorAll('.role').forEach(function (el) {
+      el.addEventListener('click', function () {
+        document.querySelectorAll('.role').forEach(function (x) { x.classList.remove('on'); });
+        el.classList.add('on'); role = el.dataset.role;
+        document.getElementById('companyWrap').style.display = role === 'FLEET_OWNER' ? 'block' : 'none';
+      });
+    });
+    var qp = new URLSearchParams(location.search).get('role');
+    if (qp) { var el = document.querySelector('.role[data-role="' + qp.toUpperCase() + '"]'); if (el) el.click(); }
+    sf.addEventListener('submit', async function (ev) {
+      ev.preventDefault();
+      if (sPass.value !== sPass2.value) return showErr('Passwords do not match');
+      var b = sf.querySelector('button'); b.disabled = true;
+      try {
+        done(await call('/api/auth/register', { fullName: sName.value, phone: sPhone.value, email: sEmail.value || null,
+          password: sPass.value, role: role, companyName: role === 'FLEET_OWNER' ? sCompany.value : null }));
+      } catch (e) { showErr(e.message); b.disabled = false; }
+    });
+  }
+</script>
+</body>
+</html>

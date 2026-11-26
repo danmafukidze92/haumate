@@ -28,6 +28,7 @@
     .btn:hover{transform:translateY(-1px)}
     .btn-accent{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;box-shadow:0 10px 24px rgba(249,95,83,.35)}
     .btn-ghost{background:rgba(255,255,255,.08);color:#fff;border:1px solid rgba(255,255,255,.25)}
+    .only-mobile{display:none}
     .menu-btn{display:none;margin-left:auto;background:none;border:0;color:#fff;font-size:28px}
     /* hero */
     .hero{background:radial-gradient(1200px 600px at 80% -10%,#2a3f9e 0%,transparent 60%),linear-gradient(160deg,#0F1A3D 0%,#14204F 55%,#1b2b6b 100%);color:#fff;margin-top:-76px;padding:150px 0 90px;position:relative;overflow:hidden}
@@ -120,7 +121,7 @@
     footer .wrap{display:flex;justify-content:space-between;flex-wrap:wrap;gap:16px;font-size:14px}
     footer a{margin-left:18px}footer a:hover{color:#fff}
     @media (max-width:960px){
-      .links,.nav .btn{display:none}.menu-btn{display:block}
+      .links,.nav .btn{display:none}.menu-btn{display:block}.only-mobile{display:inline}
       .nav.open .links{display:flex;position:absolute;top:70px;left:20px;right:20px;flex-direction:column;background:var(--navy);padding:20px;border-radius:16px;gap:16px}
       .hero .wrap,.drivers,.dl,.steps{grid-template-columns:1fr}
       h1{font-size:42px}h2{font-size:32px}.grid3{grid-template-columns:1fr}
@@ -137,8 +138,10 @@
     <div class="links">
       <a href="#what">What We Do</a><a href="#how">How It Works</a><a href="#features">Features</a>
       <a href="#drivers">For Drivers</a><a href="#faq">FAQ</a>
+      <a href="/login" class="only-mobile">Log in</a><a href="/signup" class="only-mobile">Sign up</a>
     </div>
-    <a href="#download" class="btn btn-accent"><i class="mdi mdi-download"></i> Get the App <i class="mdi mdi-arrow-right"></i></a>
+    <a href="/login" class="btn btn-ghost" id="navLogin"><i class="mdi mdi-account-circle-outline"></i> Log in</a>
+    <a href="/signup" class="btn btn-accent" id="navSignup"><i class="mdi mdi-account-plus-outline"></i> Sign up</a>
     <button class="menu-btn" onclick="document.getElementById('nav').classList.toggle('open')" aria-label="Menu"><i class="mdi mdi-menu"></i></button>
   </div>
 </nav>
@@ -151,8 +154,8 @@
       <p class="lead">From a 1-tonne bakkie to a 30-tonne horse and trailer. Get a fair recommended price, pick a verified driver,
         track the truck live, and pay only when your goods arrive.</p>
       <div class="cta">
-        <a href="#download" class="btn btn-accent"><i class="mdi mdi-download"></i> Download the App</a>
-        <a href="#how" class="btn btn-ghost"><i class="mdi mdi-play-circle-outline"></i> See how it works</a>
+        <a href="/signup" class="btn btn-accent"><i class="mdi mdi-account-plus-outline"></i> Sign up free</a>
+        <a href="#download" class="btn btn-ghost"><i class="mdi mdi-download"></i> Download the App</a>
       </div>
       <div class="stats">
         <div><b>1–30 t</b><span>Every truck size</span></div>
@@ -301,7 +304,7 @@
 <footer>
   <div class="wrap">
     <span>© HaulMate · Zimbabwe's freight marketplace</span>
-    <span><a href="#download">Get the app</a><a href="/privacy">Privacy</a><a href="/admin">Admin</a></span>
+    <span><a href="/signup">Sign up</a><a href="/login">Log in</a><a href="#download">Get the app</a><a href="/privacy">Privacy</a><a href="/admin">Admin</a></span>
   </div>
 </footer>
 
@@ -319,6 +322,10 @@
     try { new QRCode(el, { text: url, width: 130, height: 130, correctLevel: QRCode.CorrectLevel.M }); }
     catch (e) { el.innerHTML = '<img alt="QR code" src="https://api.qrserver.com/v1/create-qr-code/?size=130x130&data=' + encodeURIComponent(url) + '">'; }
   })();
+  // Signed in already? Point the nav at the user's panel.
+  try { if (localStorage.getItem('hm_token')) {
+    var a = document.getElementById('navLogin'); a.href = '/account'; a.innerHTML = '<i class="mdi mdi-view-dashboard-outline"></i> My panel';
+    document.getElementById('navSignup').style.display = 'none'; } } catch (e) {}
   document.querySelectorAll('.links a').forEach(function (a) { a.addEventListener('click', function () { document.getElementById('nav').classList.remove('open'); }); });
 </script>
 </body>

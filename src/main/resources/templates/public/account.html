@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>My panel · HaulMate</title>
+  <link rel="icon" href="/assets/images/favicon.png">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/assets/vendors/mdi/css/materialdesignicons.min.css">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+  <style>
+    :root{--ink:#0F1A3D;--navy:#14204F;--brand:#1F3BB3;--accent:#F95F53;--accent2:#FF8A4C;--muted:#5B6478;--line:#E4E8F2;--bg:#F5F7FC;--ok:#16A36A;--warn:#B76E00}
+    *{box-sizing:border-box}
+    body{margin:0;font-family:"Plus Jakarta Sans",system-ui,sans-serif;color:var(--ink);background:var(--bg)}
+    a{color:var(--brand);text-decoration:none}
+    header{background:var(--navy);color:#fff}
+    .top{max-width:1200px;margin:0 auto;padding:14px 20px;display:flex;align-items:center;gap:16px}
+    .logo{display:flex;align-items:center;gap:10px;font-weight:800;font-size:20px;color:#fff}
+    .logo i{display:grid;place-items:center;width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,var(--accent),var(--accent2));font-size:20px}
+    .logo b{color:var(--accent2)}
+    .me{margin-left:auto;display:flex;align-items:center;gap:12px;font-size:14px}
+    .me .av{width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.15);display:grid;place-items:center;font-weight:700}
+    .me small{display:block;opacity:.7}
+    .lo{background:none;border:1px solid rgba(255,255,255,.3);color:#fff;border-radius:10px;padding:8px 12px;cursor:pointer;font:inherit;font-size:13px}
+    nav.tabs{max-width:1200px;margin:0 auto;padding:0 20px;display:flex;gap:4px;overflow-x:auto}
+    nav.tabs button{background:none;border:0;color:rgba(255,255,255,.7);padding:12px 14px;font:inherit;font-weight:600;cursor:pointer;border-bottom:3px solid transparent;white-space:nowrap}
+    nav.tabs button.on{color:#fff;border-color:var(--accent2)}
+    main{max-width:1200px;margin:0 auto;padding:24px 20px 60px}
+    .banner{display:flex;gap:14px;align-items:center;background:#FFF6E5;border:1px solid #F5D9A6;color:#6B4500;border-radius:14px;padding:14px 16px;margin-bottom:20px}
+    .banner i{font-size:26px}.banner a{font-weight:700;margin-left:auto;white-space:nowrap}
+    .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:16px}
+    .card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:18px}
+    .card h3{margin:0 0 12px;font-size:17px}
+    .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:16px;margin-bottom:20px}
+    .stat{background:#fff;border:1px solid var(--line);border-radius:16px;padding:16px}.stat b{display:block;font-size:28px}.stat span{color:var(--muted);font-size:14px}
+    .load{cursor:pointer;transition:box-shadow .15s}.load:hover{box-shadow:0 6px 20px rgba(15,26,61,.08)}
+    .load .hd{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+    .place{display:flex;gap:8px;align-items:flex-start;font-size:14px;margin:4px 0}.place i{margin-top:1px}
+    .meta{display:flex;gap:14px;flex-wrap:wrap;color:var(--muted);font-size:13px;margin-top:10px}
+    .badge{display:inline-block;border-radius:999px;padding:4px 10px;font-size:12px;font-weight:700;background:#EEF1FC;color:var(--brand)}
+    .badge.ok{background:#E3F6EE;color:var(--ok)}.badge.bad{background:#FFECEB;color:#B3261E}.badge.live{background:#E3F6EE;color:var(--ok)}
+    .price{font-weight:800;font-size:18px}
+    .btn{display:inline-flex;align-items:center;gap:8px;border:0;border-radius:12px;padding:11px 16px;font:inherit;font-weight:700;cursor:pointer;background:var(--brand);color:#fff}
+    .btn.accent{background:linear-gradient(135deg,var(--accent),var(--accent2))}.btn.ghost{background:#fff;color:var(--ink);border:1px solid var(--line)}
+    .btn.sm{padding:7px 12px;font-size:13px;border-radius:10px}.btn:disabled{opacity:.6}
+    .map{height:420px;border-radius:14px;border:1px solid var(--line)}
+    .empty{text-align:center;color:var(--muted);padding:50px 20px}.empty i{font-size:44px;display:block;margin-bottom:8px;opacity:.5}
+    label{display:block;font-weight:600;font-size:13px;margin:12px 0 5px}
+    input,select,textarea{width:100%;padding:11px 12px;border:1px solid var(--line);border-radius:10px;font:inherit;font-size:14px;background:#fff}
+    .two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    .post{display:grid;grid-template-columns:1fr 1.1fr;gap:18px}
+    .flags{display:flex;flex-wrap:wrap;gap:14px;margin-top:10px;font-size:14px}.flags label{display:flex;gap:6px;align-items:center;margin:0;font-weight:500}.flags input{width:auto}
+    .quote{background:#EEF1FC;border-radius:12px;padding:12px 14px;margin-top:14px;font-size:14px}
+    .sugg{position:relative}.sugg ul{position:absolute;z-index:1000;left:0;right:0;top:100%;background:#fff;border:1px solid var(--line);border-radius:10px;list-style:none;margin:4px 0 0;padding:4px;max-height:220px;overflow:auto;box-shadow:0 10px 20px rgba(0,0,0,.08)}
+    .sugg li{padding:8px 10px;border-radius:8px;cursor:pointer;font-size:13px}.sugg li:hover{background:var(--bg)}
+    table{width:100%;border-collapse:collapse;font-size:14px}th,td{text-align:left;padding:10px 8px;border-bottom:1px solid var(--line)}th{color:var(--muted);font-weight:600}
+    .detail{display:grid;grid-template-columns:1fr 1.3fr;gap:18px}
+    .kv{display:grid;grid-template-columns:auto 1fr;gap:6px 14px;font-size:14px}.kv dt{color:var(--muted)}.kv dd{margin:0;font-weight:600}
+    .live{position:absolute;top:10px;right:10px;z-index:500;background:#fff;border-radius:12px;padding:10px 12px;box-shadow:0 4px 14px rgba(0,0,0,.15);font-size:13px;min-width:160px}
+    .pin{background:#14204F;color:#fff;border-radius:12px;padding:12px 14px;margin-top:14px}.pin b{font-size:24px;letter-spacing:4px}
+    .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--ink);color:#fff;padding:12px 18px;border-radius:12px;display:none;z-index:3000}
+    .hm-pin{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:18px;box-shadow:0 2px 6px rgba(0,0,0,.35);border:2px solid #fff;background:var(--brand)}
+    .hm-pin.busy{background:#F29F67}
+    @media(max-width:900px){.post,.detail{grid-template-columns:1fr}.me small,.me span.nm{display:none}}
+  </style>
+</head>
+<body>
+<header>
+  <div class="top">
+    <a href="/" class="logo"><i class="mdi mdi-truck-fast"></i><span>Haul<b>Mate</b></span></a>
+    <div class="me"><div><span class="nm" id="meName">...</span><small id="meRole"></small></div>
+      <div class="av" id="meAv">?</div><button class="lo" onclick="logout()"><i class="mdi mdi-logout"></i> Log out</button></div>
+  </div>
+  <nav class="tabs" id="tabs"></nav>
+</header>
+<main>
+  <div class="banner" id="kycBanner" style="display:none"><i class="mdi mdi-shield-account-outline"></i>
+    <div><b>Verify your identity</b><br><span id="kycText">Open the HaulMate app to scan your ID and take a live selfie. Verified accounts can book and carry loads.</span></div>
+    <a href="/#download">Get the app <i class="mdi mdi-arrow-right"></i></a></div>
+  <section id="view"></section>
+</main>
+<div class="toast" id="toast"></div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@stomp/stompjs@7.0.0/bundles/stomp.umd.min.js"></script>
+<script>
+/* ---------- basics ---------- */
+const TOKEN = (() => { try { return localStorage.getItem('hm_token'); } catch (e) { return null; } })();
+if (!TOKEN) location.replace('/login');
+let ME = null, stomp = null, mapObj = null, subs = [], refreshTimer = null;
+const STATUS = { OPEN:'Finding a truck', ASSIGNED:'Driver assigned', EN_ROUTE_PICKUP:'Driver on the way', AT_PICKUP:'Driver at pickup',
+  LOADED:'Loaded', IN_TRANSIT:'In transit', DELIVERED:'Delivered', COMPLETED:'Completed', CANCELLED:'Cancelled' };
+const LIVE = ['ASSIGNED','EN_ROUTE_PICKUP','AT_PICKUP','LOADED','IN_TRANSIT'];
+const TRUCKS = { PICKUP_1T:'1 t pickup / bakkie', LIGHT_3T:'3-5 t light truck', MEDIUM_8T:'8-10 t medium truck', HEAVY_15T:'15-20 t rigid / tipper', SUPER_30T:'30 t+ horse & trailer' };
+const BODIES = { OPEN:'Open', CLOSED_BOX:'Closed box', FLATBED:'Flatbed', TIPPER:'Tipper', TAUTLINER:'Tautliner', REFRIGERATED:'Refrigerated', TANKER:'Tanker', LOWBED:'Lowbed' };
+const CARGO = ['General goods','Furniture / household','Building materials','Agricultural produce','Fertiliser / seed','Mining equipment','Machinery','Livestock feed','Fuel / liquids','Retail stock','Other'];
+const PAY = { CASH:'Cash on delivery', ECOCASH:'EcoCash', ONEMONEY:'OneMoney', INNBUCKS:'InnBucks', PAYNOW_WEB:'Card / Paynow web' };
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const money = v => v == null ? '-' : '$' + Number(v).toFixed(2);
+const when = v => v ? new Date(v).toLocaleString([], { dateStyle:'medium', timeStyle:'short' }) : '-';
+function toast(m) { const t = $('#toast'); t.textContent = m; t.style.display = 'block'; clearTimeout(t._h); t._h = setTimeout(() => t.style.display = 'none', 3500); }
+function logout() { try { localStorage.removeItem('hm_token'); } catch (e) {} location.href = '/'; }
+
+async function api(path, opts = {}) {
+  const r = await fetch(path, { ...opts, headers: { 'Authorization': 'Bearer ' + TOKEN,
+    ...(opts.body ? { 'Content-Type': 'application/json' } : {}), ...(opts.headers || {}) } });
+  if (r.status === 401) { logout(); throw new Error('Signed out'); }
+  let j = null; try { j = await r.json(); } catch (e) {}
+  if (!r.ok) throw new Error((j && (j.error || j.message)) || ('Request failed (' + r.status + ')'));
+  return j;
+}
+const post = (p, b) => api(p, { method: 'POST', body: JSON.stringify(b || {}) });
+
+/* ---------- realtime ---------- */
+function connectWs() {
+  if (!window.StompJs) return;
+  stomp = new StompJs.Client({ brokerURL: (location.protocol === 'https:' ? 'wss://' : 'ws://') + location.host + '/ws',
+    connectHeaders: { Authorization: 'Bearer ' + TOKEN }, reconnectDelay: 5000 });
+  stomp.onConnect = () => { pending.forEach(f => f()); pending = []; };
+  stomp.activate();
+}
+let pending = [];
+function sub(dest, cb) {
+  const go = () => subs.push(stomp.subscribe(dest, m => cb(JSON.parse(m.body))));
+  if (stomp && stomp.connected) go(); else pending.push(go);
+}
+function cleanup() {
+  subs.forEach(s => { try { s.unsubscribe(); } catch (e) {} }); subs = []; pending = [];
+  if (mapObj) { mapObj.remove(); mapObj = null; }
+  clearInterval(refreshTimer); refreshTimer = null;
+}
+
+/* ---------- maps ---------- */
+function makeMap(el, center = [-19.0, 29.8], zoom = 6) {
+  mapObj = L.map(el).setView(center, zoom);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 18, attribution: '&copy; OpenStreetMap' }).addTo(mapObj);
+  return mapObj;
+}
+const truckIcon = busy => L.divIcon({ className: '', html: '<div class="hm-pin' + (busy ? ' busy' : '') + '"><i class="mdi mdi-truck"></i></div>', iconSize: [32, 32], iconAnchor: [16, 16] });
+const dot = (c, i) => L.divIcon({ className: '', html: '<div class="hm-pin" style="background:' + c + '"><i class="mdi mdi-' + i + '"></i></div>', iconSize: [32, 32], iconAnchor: [16, 16] });
+
+/* ---------- tabs ---------- */
+const isShipper = () => ME.role === 'SHIPPER';
+function tabsFor() {
+  return isShipper()
+    ? [['home','Overview','view-dashboard-outline'],['post','Post a load','plus-circle-outline'],['track','Live tracking','crosshairs-gps'],['loads','My loads','format-list-bulleted']]
+    : [['home','Overview','view-dashboard-outline'],['find','Find loads','magnify'],['track','Live tracking','crosshairs-gps'],['loads','My trips','history']];
+}
+function renderTabs(active) {
+  $('#tabs').innerHTML = tabsFor().map(([k, t, i]) => '<button class="' + (k === active ? 'on' : '') + '" onclick="go(\'' + k + '\')"><i class="mdi mdi-' + i + '"></i> ' + t + '</button>').join('');
+}
+function go(tab, arg) {
+  cleanup(); renderTabs(tab);
+  history.replaceState(null, '', '/account#' + tab + (arg ? '/' + arg : ''));
+  ({ home, post: postLoad, track, loads: myLoads, find: findLoads, load: loadDetail }[tab] || home)(arg);
+}
+
+/* ---------- cards ---------- */
+function loadCard(l) {
+  const cls = l.status === 'CANCELLED' ? 'bad' : (['DELIVERED','COMPLETED'].includes(l.status) ? 'ok' : (LIVE.includes(l.status) ? 'live' : ''));
+  return '<div class="card load" onclick="go(\'load\',' + l.id + ')"><div class="hd"><b>' + esc(l.ref || ('Load #' + l.id)) + '</b><span class="badge ' + cls + '">' + (STATUS[l.status] || l.status) + '</span></div>' +
+    '<div class="place"><i class="mdi mdi-circle-slice-8" style="color:#16A36A"></i>' + esc(l.pickupAddress) + '</div>' +
+    '<div class="place"><i class="mdi mdi-map-marker" style="color:#F95F53"></i>' + esc(l.dropoffAddress) + '</div>' +
+    '<div class="meta"><span class="price">' + money(l.agreedPrice || l.offeredPrice) + '</span><span><i class="mdi mdi-weight"></i> ' + l.weightTonnes + ' t</span>' +
+    '<span><i class="mdi mdi-truck"></i> ' + (TRUCKS[l.truckClass] || l.truckClass) + '</span><span><i class="mdi mdi-map-marker-distance"></i> ' + Math.round(l.distanceKm || 0) + ' km</span></div></div>';
+}
+const empty = (icon, text, action) => '<div class="card empty"><i class="mdi mdi-' + icon + '"></i>' + text + (action ? '<div style="margin-top:14px">' + action + '</div>' : '') + '</div>';
+
+/* ---------- overview ---------- */
+async function home() {
+  const v = $('#view'); v.innerHTML = '<p>Loading...</p>';
+  const loads = await api('/api/loads/mine').catch(() => []);
+  const active = loads.filter(l => !['COMPLETED','CANCELLED','DELIVERED'].includes(l.status));
+  const done = loads.filter(l => ['COMPLETED','DELIVERED'].includes(l.status)).length;
+  v.innerHTML = '<div class="stats">' +
+    '<div class="stat"><b>' + active.length + '</b><span>' + (isShipper() ? 'Active loads' : 'Active trips') + '</span></div>' +
+    '<div class="stat"><b>' + active.filter(l => LIVE.includes(l.status)).length + '</b><span>On the road now</span></div>' +
+    '<div class="stat"><b>' + done + '</b><span>Completed</span></div>' +
+    '<div class="stat"><b>' + (ME.ratingAvg ? Number(ME.ratingAvg).toFixed(1) + ' ★' : '-') + '</b><span>Your rating</span></div></div>' +
+    '<div style="display:flex;justify-content:space-between;align-items:center;margin:6px 0 12px"><h3 style="margin:0">' + (isShipper() ? 'Active loads' : 'Active trips') + '</h3>' +
+    (isShipper() ? '<button class="btn accent" onclick="go(\'post\')"><i class="mdi mdi-plus"></i> Post a load</button>' : '<button class="btn" onclick="go(\'find\')"><i class="mdi mdi-magnify"></i> Find loads</button>') + '</div>' +
+    (active.length ? '<div class="grid">' + active.map(loadCard).join('') + '</div>'
+      : empty(isShipper() ? 'package-variant' : 'truck-outline', isShipper() ? 'No active loads yet.' : 'No active trips. Find a load near you.',
+          isShipper() ? '<button class="btn accent" onclick="go(\'post\')">Post your first load</button>' : ''));
+}
+
+/* ---------- my loads ---------- */
+async function myLoads() {
+  const v = $('#view'); v.innerHTML = '<p>Loading...</p>';
+  const loads = await api('/api/loads/mine').catch(() => []);
+  v.innerHTML = '<div class="card"><h3>' + (isShipper() ? 'All my loads' : 'All my trips') + '</h3>' + (loads.length ?
+    '<div style="overflow-x:auto"><table><thead><tr><th>Ref</th><th>From</th><th>To</th><th>Price</th><th>Status</th><th>Posted</th></tr></thead><tbody>' +
+    loads.map(l => '<tr style="cursor:pointer" onclick="go(\'load\',' + l.id + ')"><td><b>' + esc(l.ref) + '</b></td><td>' + esc(l.pickupAddress) + '</td><td>' + esc(l.dropoffAddress) +
+      '</td><td>' + money(l.agreedPrice || l.offeredPrice) + '</td><td><span class="badge">' + (STATUS[l.status] || l.status) + '</span></td><td>' + when(l.createdAt) + '</td></tr>').join('') +
+    '</tbody></table></div>' : '<p class="empty">Nothing here yet.</p>') + '</div>';
+}
+
+/* ---------- live tracking (all) ---------- */
+async function track() {
+  const v = $('#view');
+  v.innerHTML = '<div class="card" style="position:relative;padding:8px"><div id="tmap" class="map" style="height:560px"></div><div class="live" id="tinfo">Loading...</div></div>';
+  const map = makeMap('tmap'); const markers = {}, lines = {}, drops = {};
+  async function refresh() {
+    const list = await api('/api/loads/tracking').catch(() => []);
+    $('#tinfo').innerHTML = list.length ? '<span class="badge live">LIVE</span> ' + list.length + ' on the move' : 'No trucks on the road for you right now';
+    const pts = [];
+    list.forEach(l => {
+      const drop = [l.dropoffLat, l.dropoffLng]; pts.push(drop);
+      if (!drops[l.id]) drops[l.id] = L.marker(drop, { icon: dot('#F95F53', 'flag-checkered') }).addTo(map).bindPopup('Drop-off: ' + esc(l.dropoffAddress));
+      if (l.lat != null) { pts.push([l.lat, l.lng]); place(l.id, l.lat, l.lng, l); }
+      if (!markers[l.id + 's']) { markers[l.id + 's'] = true; sub('/topic/loads/' + l.id + '/location', d => place(l.id, d.lat, d.lng, { ...l, ...d })); }
+    });
+    if (pts.length && !map._fitted) { map._fitted = true; map.fitBounds(pts, { padding: [40, 40], maxZoom: 13 }); }
+  }
+  function place(id, lat, lng, l) {
+    const ll = [lat, lng];
+    if (markers[id]) markers[id].setLatLng(ll); else markers[id] = L.marker(ll, { icon: truckIcon(true), zIndexOffset: 1000 }).addTo(map);
+    markers[id].bindPopup('<b>' + esc(l.ref || ('Load #' + id)) + '</b><br>' + (STATUS[l.status] || '') + (l.driverName ? '<br>' + esc(l.driverName) : '') +
+      (l.etaMinutes != null ? '<br>ETA ' + l.etaMinutes + ' min' : '') + (l.remainingKm != null ? ' · ' + l.remainingKm + ' km left' : '') +
+      '<br><a href="#" onclick="go(\'load\',' + id + ');return false">Open load</a>');
+    const drop = [l.dropoffLat, l.dropoffLng];
+    if (lines[id]) lines[id].setLatLngs([ll, drop]); else lines[id] = L.polyline([ll, drop], { color: '#1F3BB3', weight: 2, dashArray: '6 6' }).addTo(map);
+  }
+  await refresh(); refreshTimer = setInterval(refresh, 30000);
+}
+
+/* ---------- load detail ---------- */
+async function loadDetail(id) {
+  const v = $('#view'); v.innerHTML = '<p>Loading...</p>';
+  let d; try { d = await api('/api/loads/' + id); } catch (e) { v.innerHTML = empty('alert-circle-outline', esc(e.message)); return; }
+  const l = d.load, mine = isShipper();
+  const kv = (k, val) => val == null || val === '' ? '' : '<dt>' + k + '</dt><dd>' + val + '</dd>';
+  v.innerHTML = '<p><a href="#" onclick="go(\'loads\');return false"><i class="mdi mdi-arrow-left"></i> Back</a></p><div class="detail"><div>' +
+    '<div class="card"><div class="load hd" style="cursor:default"><h3 style="margin:0">' + esc(l.ref) + '</h3><span class="badge">' + (STATUS[l.status] || l.status) + '</span></div>' +
+    '<div class="place" style="margin-top:12px"><i class="mdi mdi-circle-slice-8" style="color:#16A36A"></i>' + esc(l.pickupAddress) + '</div>' +
+    '<div class="place"><i class="mdi mdi-map-marker" style="color:#F95F53"></i>' + esc(l.dropoffAddress) + '</div><dl class="kv" style="margin-top:14px">' +
+    kv('Price', money(l.agreedPrice || l.offeredPrice)) + kv('Recommended', money(l.recommendedPrice)) + kv('Cargo', esc(l.cargoType) + (l.cargoDescription ? ' – ' + esc(l.cargoDescription) : '')) +
+    kv('Weight', l.weightTonnes + ' t') + kv('Truck', TRUCKS[l.truckClass]) + kv('Body', BODIES[l.bodyType]) + kv('Distance', Math.round(l.distanceKm) + ' km') +
+    kv('Pickup', when(l.pickupFrom)) + kv('Payment', PAY[l.paymentMethod] + (l.paid ? ' · paid' : '')) +
+    kv('Driver', d.driver ? esc(d.driver.name) + (d.driver.rating ? ' · ' + Number(d.driver.rating).toFixed(1) + ' ★' : '') : null) +
+    kv('Truck reg', d.truck ? esc(d.truck.registration || d.truck.regNumber || '') : null) + kv('Shipper', !mine && d.shipper ? esc(d.shipper.name) : null) + '</dl>' +
+    (d.deliveryPin ? '<div class="pin">Delivery PIN – give this to the person receiving the goods<br><b>' + esc(d.deliveryPin) + '</b></div>' : '') +
+    '<div style="display:flex;gap:8px;margin-top:14px;flex-wrap:wrap" id="acts"></div></div>' +
+    (mine && l.status === 'OPEN' ? '<div class="card" style="margin-top:16px"><h3>Offers from drivers</h3><div id="offers">Loading...</div></div>' : '') +
+    '</div><div class="card" style="position:relative;padding:8px"><div id="lmap" class="map" style="height:520px"></div><div class="live" id="linfo" style="display:none"></div></div></div>';
+
+  const acts = $('#acts');
+  if (mine && ['OPEN','ASSIGNED'].includes(l.status)) acts.innerHTML += '<button class="btn ghost sm" onclick="cancelLoad(' + l.id + ')"><i class="mdi mdi-close"></i> Cancel load</button>';
+  if (!mine && l.status === 'OPEN') acts.innerHTML += '<button class="btn sm" onclick="offer(' + l.id + ')"><i class="mdi mdi-check"></i> Accept ' + money(l.offeredPrice) + '</button><button class="btn ghost sm" onclick="counter(' + l.id + ')">Counter-offer</button>';
+  if (LIVE.includes(l.status)) acts.innerHTML += '<span class="badge" style="align-self:center">Chat and calls are in the app</span>';
+
+  const map = makeMap('lmap'); const a = [l.pickupLat, l.pickupLng], b = [l.dropoffLat, l.dropoffLng];
+  L.marker(a, { icon: dot('#16A36A', 'package-variant') }).addTo(map).bindPopup('Pickup');
+  L.marker(b, { icon: dot('#F95F53', 'flag-checkered') }).addTo(map).bindPopup('Drop-off');
+  L.polyline([a, b], { color: '#999', weight: 2, dashArray: '6 6' }).addTo(map);
+  map.fitBounds([a, b], { padding: [40, 40] });
+  const trail = L.polyline([], { color: '#1F3BB3', weight: 4 }).addTo(map); let truck = null;
+  const move = (lat, lng, follow) => { const ll = [lat, lng];
+    if (truck) truck.setLatLng(ll); else truck = L.marker(ll, { icon: truckIcon(true), zIndexOffset: 1000 }).addTo(map);
+    trail.addLatLng(ll); if (follow && !map.getBounds().pad(-0.1).contains(ll)) map.panTo(ll); };
+  if (l.driverId) {
+    const t = await api('/api/loads/' + id + '/trail').catch(() => []);
+    if (t.length) { trail.setLatLngs(t.map(p => [p.lat, p.lng])); const p = t[t.length - 1]; move(p.lat, p.lng, false); map.fitBounds([a, b, [p.lat, p.lng]], { padding: [40, 40] }); }
+    else if (d.driverPosition) move(d.driverPosition.lat, d.driverPosition.lng, false);
+  }
+  if (LIVE.includes(l.status)) {
+    const info = $('#linfo'); info.style.display = 'block';
+    const eta = ['LOADED','IN_TRANSIT'].includes(l.status) ? l.etaDropoffMinutes : l.etaPickupMinutes;
+    info.innerHTML = '<span class="badge live">LIVE</span><br>' + (eta != null ? '<b>' + eta + ' min</b> to ' + (['LOADED','IN_TRANSIT'].includes(l.status) ? 'drop-off' : 'pickup') : 'Waiting for location...');
+    sub('/topic/loads/' + id + '/location', p => { move(p.lat, p.lng, true);
+      info.innerHTML = '<span class="badge live">LIVE</span><br>' + (p.etaMinutes != null ? '<b>' + p.etaMinutes + ' min</b> to ' + (p.target === 'pickup' ? 'pickup' : 'drop-off') + '<br>' : '') +
+        (p.remainingKm != null ? p.remainingKm + ' km left<br>' : '') + (p.speedKmh != null ? Math.round(p.speedKmh) + ' km/h<br>' : '') + '<small>' + new Date().toLocaleTimeString() + '</small>'; });
+  }
+  sub('/topic/loads/' + id + '/status', s => { if (s.status && s.status !== l.status) { toast('Status: ' + (STATUS[s.status] || s.status)); go('load', id); }
+    else if (s.type === 'offer' && $('#offers')) loadOffers(id); });
+  if ($('#offers')) loadOffers(id);
+}
+async function loadOffers(id) {
+  const list = await api('/api/loads/' + id + '/offers').catch(() => []);
+  const el = $('#offers'); if (!el) return;
+  const open = list.filter(o => o.status === 'PENDING');
+  el.innerHTML = open.length ? '<table><tbody>' + open.map(o => '<tr><td><b>' + money(o.amount) + '</b>' + (o.counter ? ' <span class="badge">counter</span>' : '') + '</td><td>' +
+    (o.distanceToPickupKm != null ? o.distanceToPickupKm + ' km · ' + o.etaMinutes + ' min away' : '') + '</td><td style="text-align:right"><button class="btn sm" onclick="acceptOffer(' + id + ',' + o.id + ')">Accept</button></td></tr>').join('') + '</tbody></table>'
+    : '<p style="color:var(--muted);margin:0">Waiting for drivers. We are alerting trucks near your pickup and widening the search automatically.</p>';
+}
+async function acceptOffer(id, oid) { try { await post('/api/loads/' + id + '/offers/' + oid + '/accept'); toast('Driver booked'); go('load', id); } catch (e) { toast(e.message); } }
+async function cancelLoad(id) { const r = prompt('Reason for cancelling?'); if (r === null) return; try { await post('/api/loads/' + id + '/cancel', { reason: r }); toast('Load cancelled'); go('load', id); } catch (e) { toast(e.message); } }
+async function offer(id) { try { await post('/api/driver/loads/' + id + '/offer', {}); toast('Offer sent to the shipper'); go('load', id); } catch (e) { toast(e.message); } }
+async function counter(id) { const a = prompt('Your price in USD'); if (!a) return; try { await post('/api/driver/loads/' + id + '/offer', { amount: Number(a) }); toast('Counter-offer sent'); go('load', id); } catch (e) { toast(e.message); } }
+
+/* ---------- driver: find loads ---------- */
+async function findLoads() {
+  const v = $('#view');
+  v.innerHTML = '<div style="display:flex;gap:10px;align-items:center;margin-bottom:14px;flex-wrap:wrap"><h3 style="margin:0">Loads near you</h3>' +
+    '<select id="rad" style="width:auto;margin-left:auto"><option value="50">Within 50 km</option><option value="150" selected>Within 150 km</option><option value="400">Within 400 km</option><option value="1500">Anywhere in Zimbabwe</option></select></div>' +
+    '<div class="banner" style="background:#EEF1FC;border-color:#D5DCF6;color:var(--ink)"><i class="mdi mdi-information-outline"></i><div>Distances are from your truck’s last position. Go online in the app so shippers can see you and we can send you nearby loads.</div></div><div id="list">Loading...</div>';
+  const load = async () => {
+    let list = []; try { list = await api('/api/driver/loads/available?radiusKm=' + $('#rad').value); } catch (e) { $('#list').innerHTML = empty('truck-alert-outline', esc(e.message)); return; }
+    $('#list').innerHTML = list.length ? '<div class="grid">' + list.map(x => loadCard(x.load).replace('<div class="meta">', '<div class="meta"><span><i class="mdi mdi-navigation-variant"></i> ' + x.distanceToPickupKm + ' km to pickup</span>') +
+      '').join('') + '</div>' : empty('truck-outline', 'No open loads in this area right now.');
+  };
+  $('#rad').onchange = load; await load(); refreshTimer = setInterval(load, 45000);
+}
+
+/* ---------- shipper: post a load ---------- */
+function postLoad() {
+  const v = $('#view');
+  v.innerHTML = '<div class="post"><form class="card" id="pf"><h3>Post a load</h3>' +
+    '<label>Pickup</label><div class="sugg"><input id="pA" placeholder="Search a place or click the map" autocomplete="off"><ul id="pAs" hidden></ul></div>' +
+    '<label>Drop-off</label><div class="sugg"><input id="dA" placeholder="Search a place or click the map" autocomplete="off"><ul id="dAs" hidden></ul></div>' +
+    '<div class="two"><div><label>Cargo</label><select id="cargo">' + CARGO.map(c => '<option>' + c + '</option>').join('') + '</select></div>' +
+    '<div><label>Weight (tonnes)</label><input id="wt" type="number" min="0.1" max="40" step="0.1" value="1" required></div></div>' +
+    '<label>Description</label><input id="desc" placeholder="e.g. 40 bags of cement">' +
+    '<div class="two"><div><label>Truck size</label><select id="tc">' + Object.entries(TRUCKS).map(([k, t]) => '<option value="' + k + '">' + t + '</option>').join('') + '</select></div>' +
+    '<div><label>Body type</label><select id="bt">' + Object.entries(BODIES).map(([k, t]) => '<option value="' + k + '">' + t + '</option>').join('') + '</select></div></div>' +
+    '<div class="flags"><label><input type="checkbox" id="fH"> Hazardous</label><label><input type="checkbox" id="fF"> Fragile</label><label><input type="checkbox" id="fR"> Refrigerated</label><label><input type="checkbox" id="fU"> Urgent</label></div>' +
+    '<div class="two"><div><label>Pickup date &amp; time</label><input id="when" type="datetime-local"></div><div><label>Payment</label><select id="pay">' +
+    Object.entries(PAY).map(([k, t]) => '<option value="' + k + '">' + t + '</option>').join('') + '</select></div></div>' +
+    '<div class="quote" id="quote">Choose pickup and drop-off to see the recommended price.</div>' +
+    '<label>Your offer (USD)</label><input id="price" type="number" min="1" step="1" required>' +
+    '<button class="btn accent" style="width:100%;margin-top:16px;justify-content:center" type="submit"><i class="mdi mdi-send"></i> Post load and find a truck</button></form>' +
+    '<div class="card" style="padding:8px"><div id="pmap" class="map" style="height:640px"></div><p style="margin:8px;color:var(--muted);font-size:13px">Click the map to set the pickup, then click again for the drop-off.</p></div></div>';
+  const now = new Date(Date.now() + 3600e3); now.setMinutes(0, 0, 0);
+  $('#when').value = new Date(now - now.getTimezoneOffset() * 6e4).toISOString().slice(0, 16);
+
+  const map = makeMap('pmap'); const pts = { p: null, d: null }, mk = { p: null, d: null };
+  const setPt = (k, lat, lng, name) => {
+    pts[k] = { lat, lng, name: name || (lat.toFixed(5) + ', ' + lng.toFixed(5)) };
+    $(k === 'p' ? '#pA' : '#dA').value = pts[k].name;
+    if (mk[k]) mk[k].setLatLng([lat, lng]);
+    else mk[k] = L.marker([lat, lng], { draggable: true, icon: dot(k === 'p' ? '#16A36A' : '#F95F53', k === 'p' ? 'package-variant' : 'flag-checkered') }).addTo(map)
+      .on('dragend', e => { const g = e.target.getLatLng(); reverse(k, g.lat, g.lng); });
+    if (pts.p && pts.d) map.fitBounds([[pts.p.lat, pts.p.lng], [pts.d.lat, pts.d.lng]], { padding: [50, 50] }); else map.setView([lat, lng], 12);
+    quote();
+  };
+  async function reverse(k, lat, lng) {
+    setPt(k, lat, lng);
+    try { const r = await fetch('https://nominatim.openstreetmap.org/reverse?format=json&zoom=16&lat=' + lat + '&lon=' + lng); const j = await r.json();
+      if (j.display_name) { pts[k].name = j.display_name.split(',').slice(0, 3).join(','); $(k === 'p' ? '#pA' : '#dA').value = pts[k].name; } } catch (e) {}
+  }
+  map.on('click', e => reverse(!pts.p ? 'p' : 'd', e.latlng.lat, e.latlng.lng));
+  const search = (inp, ul, k) => { let h;
+    $(inp).addEventListener('input', () => { clearTimeout(h); const q = $(inp).value.trim(); if (q.length < 3) { $(ul).hidden = true; return; }
+      h = setTimeout(async () => { try {
+        const r = await fetch('https://nominatim.openstreetmap.org/search?format=json&countrycodes=zw&limit=6&q=' + encodeURIComponent(q)); const j = await r.json();
+        $(ul).innerHTML = j.map((x, i) => '<li data-i="' + i + '">' + esc(x.display_name) + '</li>').join(''); $(ul).hidden = !j.length;
+        $(ul).querySelectorAll('li').forEach(li => li.onclick = () => { const x = j[li.dataset.i]; $(ul).hidden = true;
+          setPt(k, Number(x.lat), Number(x.lon), x.display_name.split(',').slice(0, 3).join(',')); });
+      } catch (e) {} }, 400); }); };
+  search('#pA', '#pAs', 'p'); search('#dA', '#dAs', 'd');
+
+  ['#wt', '#tc', '#fH', '#fF', '#fR', '#fU'].forEach(s => $(s).addEventListener('change', quote));
+  $('#wt').addEventListener('change', () => { const w = Number($('#wt').value);
+    $('#tc').value = w <= 1 ? 'PICKUP_1T' : w <= 3 ? 'LIGHT_3T' : w <= 8 ? 'MEDIUM_8T' : w <= 15 ? 'HEAVY_15T' : 'SUPER_30T'; quote(); });
+  let lastRec = null;
+  async function quote() {
+    if (!pts.p || !pts.d) return;
+    try { const q = await post('/api/pricing/estimate', { pickupLat: pts.p.lat, pickupLng: pts.p.lng, dropLat: pts.d.lat, dropLng: pts.d.lng,
+        weightTonnes: Number($('#wt').value), truckClass: $('#tc').value, hazardous: $('#fH').checked, fragile: $('#fF').checked, refrigerated: $('#fR').checked, urgent: $('#fU').checked });
+      $('#quote').innerHTML = '<b>Recommended: ' + money(q.recommended) + '</b> (fair range ' + money(q.low) + ' – ' + money(q.high) + ')<br>' + Math.round(q.distanceKm) + ' km · about ' + Math.round(q.durationMinutes / 60 * 10) / 10 + ' h driving';
+      if (!$('#price').value || Number($('#price').value) === lastRec) $('#price').value = Math.round(q.recommended);
+      lastRec = Math.round(q.recommended);
+    } catch (e) { $('#quote').textContent = e.message; }
+  }
+  $('#pf').addEventListener('submit', async ev => {
+    ev.preventDefault();
+    if (!pts.p || !pts.d) return toast('Set both pickup and drop-off');
+    const b = ev.target.querySelector('button[type=submit]'); b.disabled = true;
+    try {
+      const l = await post('/api/loads', { pickupAddress: pts.p.name, pickupLat: pts.p.lat, pickupLng: pts.p.lng, dropoffAddress: pts.d.name, dropoffLat: pts.d.lat, dropoffLng: pts.d.lng,
+        cargoType: $('#cargo').value, cargoDescription: $('#desc').value, weightTonnes: Number($('#wt').value), truckClass: $('#tc').value, bodyType: $('#bt').value,
+        hazardous: $('#fH').checked, fragile: $('#fF').checked, refrigerated: $('#fR').checked, urgent: $('#fU').checked,
+        pickupFrom: $('#when').value ? new Date($('#when').value).toISOString() : null, pickupTo: null,
+        offeredPrice: Number($('#price').value), paymentMethod: $('#pay').value });
+      toast('Load posted. Alerting drivers near you...'); go('load', l.id);
+    } catch (e) { toast(e.message); b.disabled = false; }
+  });
+}
+
+/* ---------- start ---------- */
+(async () => {
+  try { ME = await api('/api/me'); } catch (e) { return; }
+  if (ME.role === 'ADMIN') { location.replace('/admin'); return; }
+  $('#meName').textContent = ME.fullName; $('#meAv').textContent = (ME.fullName || '?').trim().charAt(0).toUpperCase();
+  $('#meRole').textContent = { SHIPPER: 'Shipper', DRIVER: 'Driver', FLEET_OWNER: 'Fleet owner' }[ME.role] + (ME.kycStatus === 'VERIFIED' ? ' · verified' : '');
+  if (ME.kycStatus !== 'VERIFIED') {
+    $('#kycBanner').style.display = 'flex';
+    if (ME.kycStatus === 'PENDING') $('#kycText').textContent = 'Your documents are being checked. We will notify you once you are verified.';
+    if (ME.kycStatus === 'REJECTED') $('#kycText').textContent = 'Your verification was not accepted. Please redo it in the HaulMate app with clear photos.';
+  }
+  connectWs();
+  const [tab, arg] = (location.hash.slice(1) || 'home').split('/');
+  go(tab, arg ? Number(arg) : undefined);
+})();
+</script>
+</body>
+</html>

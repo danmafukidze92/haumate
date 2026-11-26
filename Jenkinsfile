@@ -98,7 +98,11 @@ pipeline {
                   for i in $(seq 1 40); do
                     status=$(docker inspect -f '{{.State.Health.Status}}' ${CONTAINER} 2>/dev/null || echo missing)
                     echo "health: $status"
-                    [ "$status" = "healthy" ] && exit 0
+                    if [ "$status" = "healthy" ]; then
+                      # new container = new IP; make Nginx Proxy Manager re-resolve haulmate-app
+                      docker exec nginx-proxy-manager-npm-1 nginx -s reload 2>/dev/null || true
+                      exit 0
+                    fi
                     [ "$status" = "missing" ] && break
                     sleep 10
                   done

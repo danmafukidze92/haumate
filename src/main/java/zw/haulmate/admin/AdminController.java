@@ -75,6 +75,11 @@ public class AdminController {
 
     @GetMapping("/privacy") public String privacy() { return "public/privacy"; }
 
+    // ----- Customer web portal (shippers, drivers, fleet owners). Pages call the same JWT API as the app. -----
+    @GetMapping("/login") public String login(Model m) { m.addAttribute("mode", "login"); return "public/auth"; }
+    @GetMapping("/signup") public String signup(Model m) { m.addAttribute("mode", "signup"); return "public/auth"; }
+    @GetMapping({"/account", "/account/"}) public String account() { return "public/account"; }
+
     @GetMapping("/download/android")
     public ResponseEntity<FileSystemResource> apk() {
         Path f = storage.resolve("apps/haulmate.apk");

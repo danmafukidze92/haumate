@@ -62,7 +62,7 @@ public class SecurityConfig {
         http.authorizeHttpRequests(a -> a
                 .requestMatchers("/assets/**", "/admin/login", "/manifest.webmanifest", "/sw.js",
                                  "/v3/api-docs/**", "/swagger-ui/**", "/actuator/health", "/payment/return",
-                                 "/", "/download/**", "/privacy").permitAll()
+                                 "/", "/download/**", "/privacy", "/login", "/signup", "/account", "/account/").permitAll()
                 .requestMatchers("/admin/**").hasRole("ADMIN")
                 .anyRequest().permitAll())
             .formLogin(f -> f.loginPage("/admin/login").usernameParameter("phone")
