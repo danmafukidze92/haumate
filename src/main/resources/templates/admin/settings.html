@@ -83,8 +83,20 @@
           <button class="btn btn-primary text-white">Save settings</button>
         </div>
         </form>
-        <div class="card card-rounded mb-4"><div class="card-body">
+        <div class="card card-rounded mb-4" id="apps"><div class="card-body">
           <h4 class="card-title">Mobile apps (download page)</h4>
+          <div class="row align-items-center mb-3 p-3 rounded" style="background:#F5F7FC">
+            <div class="col-md-8" th:if="${hasApk}">
+              <p class="mb-1"><i class="mdi mdi-android text-success"></i> <b>Installable Android app</b>
+                &middot; version <span th:text="${apkVersion}"></span> &middot; <span th:text="${apkSizeMb}"></span> MB
+                &middot; uploaded <span th:text="${#temporals.format(apkUpdated, 'dd MMM yyyy HH:mm', T(java.time.ZoneId).of('Africa/Harare'))}"></span></p>
+              <a href="/download/android" class="btn btn-primary text-white btn-sm mt-1"><i class="mdi mdi-download"></i> Download APK</a>
+              <button type="button" class="btn btn-outline-primary btn-sm mt-1" onclick="navigator.clipboard.writeText(location.origin + '/download/android');this.textContent='Link copied'"><i class="mdi mdi-link"></i> Copy download link</button>
+              <p class="small text-muted mt-2 mb-0">Scan the QR code with an Android phone to install directly. Allow "Install unknown apps" when asked.</p>
+            </div>
+            <div class="col-md-4 text-center" th:if="${hasApk}"><div id="apkQr" style="display:inline-block;background:#fff;padding:8px;border-radius:8px"></div></div>
+            <div class="col-12" th:unless="${hasApk}"><i class="mdi mdi-alert-outline text-warning"></i> No APK uploaded yet. Build it with <code>flutter build apk --release</code> and upload <code>app-release.apk</code> below.</div>
+          </div>
           <form th:action="@{/admin/settings}" method="post" class="row">
             <div class="col-md-5 form-group"><label>Google Play link</label><input class="form-control" name="s.app.android_url" th:value="${s['app.android_url']?.value}" placeholder="https://play.google.com/store/apps/details?id=zw.haulmate.haulmate_app"></div>
             <div class="col-md-5 form-group"><label>App Store link</label><input class="form-control" name="s.app.ios_url" th:value="${s['app.ios_url']?.value}" placeholder="https://apps.apple.com/..."></div>
@@ -104,6 +116,11 @@
   </div>
 </div>
 <th:block th:replace="~{admin/fragments :: scripts}"></th:block>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script>
+  (function () { var el = document.getElementById('apkQr'); if (el && window.QRCode)
+    new QRCode(el, { text: location.origin + '/download/android', width: 140, height: 140 }); })();
+</script>
 <script>
   // Highlight which credential block is active
   const sel = document.getElementById('paynowMode');

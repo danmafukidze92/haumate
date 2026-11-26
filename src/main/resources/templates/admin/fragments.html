@@ -40,6 +40,12 @@
         <span class="badge" th:classappend="${paynowMode == 'LIVE'} ? 'bg-success' : 'bg-warning text-dark'"
               th:text="'Paynow ' + ${paynowMode}">Paynow TEST</span>
       </li>
+      <li class="nav-item me-2">
+        <a th:if="${hasApk}" href="/download/android" class="btn btn-sm btn-primary text-white" title="Download the installable Android app">
+          <i class="mdi mdi-android"></i> <span class="d-none d-sm-inline">Download APK</span></a>
+        <a th:unless="${hasApk}" href="/admin/settings#apps" class="btn btn-sm btn-outline-secondary" title="No APK uploaded yet">
+          <i class="mdi mdi-android"></i> <span class="d-none d-sm-inline">Upload APK</span></a>
+      </li>
       <li class="nav-item">
         <a class="nav-link count-indicator" href="/admin/kyc" title="Pending verifications">
           <i class="icon-bell"></i><span class="count" th:if="${pendingKyc > 0}"></span>

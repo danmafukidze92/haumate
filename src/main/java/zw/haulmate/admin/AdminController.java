@@ -46,6 +46,19 @@ public class AdminController {
             m.addAttribute("adminName", users.findByPhone(p.getName()).map(AppUser::getFullName).orElse("Admin"));
             m.addAttribute("pendingKyc", users.countByKycStatus(KycStatus.PENDING));
             m.addAttribute("paynowMode", settings.get("paynow.mode", "TEST"));
+            // Installable Android app, shown in the top bar and on Settings so admins can download or share it
+            try {
+                Path apk = storage.resolve("apps/haulmate.apk");
+                boolean has = Files.exists(apk);
+                m.addAttribute("hasApk", has);
+                if (has) {
+                    m.addAttribute("apkSizeMb", String.format("%.1f", Files.size(apk) / 1048576.0));
+                    m.addAttribute("apkUpdated", Files.getLastModifiedTime(apk).toInstant());
+                }
+                m.addAttribute("apkVersion", settings.get("app.latest_version", "1.0.0"));
+            } catch (Exception e) {
+                m.addAttribute("hasApk", false);
+            }
         }
     }
 
