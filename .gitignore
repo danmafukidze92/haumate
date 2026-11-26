@@ -23,3 +23,7 @@ mobile/android/app/release/
 mobile/.flutter-plugins
 mobile/.flutter-plugins-dependencies
 mobile/ios/Pods/
+# Android release signing (kept on the VPS in the haulmate-android-keys volume, never in git)
+mobile/android/key.properties
+*.jks
+*.keystore

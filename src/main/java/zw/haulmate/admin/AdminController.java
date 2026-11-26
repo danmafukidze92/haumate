@@ -55,11 +55,20 @@ public class AdminController {
                     m.addAttribute("apkSizeMb", String.format("%.1f", Files.size(apk) / 1048576.0));
                     m.addAttribute("apkUpdated", Files.getLastModifiedTime(apk).toInstant());
                 }
-                m.addAttribute("apkVersion", settings.get("app.latest_version", "1.0.0"));
+                m.addAttribute("apkVersion", apkVersion());
             } catch (Exception e) {
                 m.addAttribute("hasApk", false);
             }
         }
+    }
+
+    /** Version of the APK being served: written by the Jenkins APK build, else the version typed at manual upload. */
+    private String apkVersion() {
+        try {
+            Path v = storage.resolve("apps/haulmate.version");
+            if (Files.exists(v)) { String s = Files.readString(v).trim(); if (!s.isEmpty()) return s; }
+        } catch (Exception ignored) { }
+        return settings.get("app.latest_version", "1.0.0");
     }
 
     /** Old admin sign-in address: everyone now signs in at /login and lands on the view for their role. */
@@ -73,7 +82,7 @@ public class AdminController {
             hasApk = Files.exists(storage.resolve("apps/haulmate.apk"));
             android = settings.get("app.android_url");
             ios = settings.get("app.ios_url");
-            version = settings.get("app.latest_version", "1.0.0");
+            version = apkVersion();
         } catch (Exception e) {
             org.slf4j.LoggerFactory.getLogger(AdminController.class).warn("Landing page settings unavailable: {}", e.getMessage());
         }
@@ -114,6 +123,7 @@ public class AdminController {
         Path dir = storage.resolve("apps");
         Files.createDirectories(dir);
         apk.transferTo(dir.resolve("haulmate.apk"));
+        Files.deleteIfExists(dir.resolve("haulmate.version")); // manual upload: use the version typed below
         if (version != null && !version.isBlank()) settings.save(Map.of("app.latest_version", version.trim()), p.getName());
         ra.addFlashAttribute("msg", "APK uploaded. It is now downloadable from the home page.");
         return "redirect:/admin/settings";

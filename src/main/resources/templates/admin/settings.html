@@ -92,10 +92,10 @@
                 &middot; uploaded <span th:text="${#temporals.format(apkUpdated, 'dd MMM yyyy HH:mm', T(java.time.ZoneId).of('Africa/Harare'))}"></span></p>
               <a href="/download/android" class="btn btn-primary text-white btn-sm mt-1"><i class="mdi mdi-download"></i> Download APK</a>
               <button type="button" class="btn btn-outline-primary btn-sm mt-1" onclick="navigator.clipboard.writeText(location.origin + '/download/android');this.textContent='Link copied'"><i class="mdi mdi-link"></i> Copy download link</button>
-              <p class="small text-muted mt-2 mb-0">Scan the QR code with an Android phone to install directly. Allow "Install unknown apps" when asked.</p>
+              <p class="small text-muted mt-2 mb-0">Built and published automatically by Jenkins whenever the app code changes. Scan the QR code with an Android phone to install directly. Allow "Install unknown apps" when asked.</p>
             </div>
             <div class="col-md-4 text-center" th:if="${hasApk}"><div id="apkQr" style="display:inline-block;background:#fff;padding:8px;border-radius:8px"></div></div>
-            <div class="col-12" th:unless="${hasApk}"><i class="mdi mdi-alert-outline text-warning"></i> No APK uploaded yet. Build it with <code>flutter build apk --release</code> and upload <code>app-release.apk</code> below.</div>
+            <div class="col-12" th:unless="${hasApk}"><i class="mdi mdi-alert-outline text-warning"></i> No APK yet. Jenkins builds and publishes it automatically on the next deploy (or run the job with <b>FORCE_APK</b>). You can also upload <code>app-release.apk</code> by hand below.</div>
           </div>
           <form th:action="@{/admin/settings}" method="post" class="row">
             <div class="col-md-5 form-group"><label>Google Play link</label><input class="form-control" name="s.app.android_url" th:value="${s['app.android_url']?.value}" placeholder="https://play.google.com/store/apps/details?id=zw.haulmate.haulmate_app"></div>
