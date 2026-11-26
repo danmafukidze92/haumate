@@ -1,5 +1,5 @@
 celery[redis]==5.4.0
-redis==5.0.8
+redis>=6.1.0,<7
 psycopg[binary]==3.2.3
 firebase-admin==6.5.0
 opencv-contrib-python-headless==4.10.0.84
