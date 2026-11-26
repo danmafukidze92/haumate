@@ -156,6 +156,8 @@ pipeline {
                         -v ${KEYS_VOL}:/keys:ro \
                         -v haulmate-gradle-cache:/root/.gradle \
                         -v haulmate-pub-cache:/root/.pub-cache \
+                        -v haulmate-android-platforms:/opt/android-sdk-linux/platforms \
+                        -v haulmate-android-ndk:/opt/android-sdk-linux/ndk \
                         ${FLUTTER_IMAGE} sleep 7200
                       docker exec ${APK_BUILDER} mkdir -p /src
                       docker cp mobile/. ${APK_BUILDER}:/src
@@ -169,7 +171,12 @@ pipeline {
                         git config --global --add safe.directory "*" || true
                         flutter --version
                         flutter pub get
-                        flutter build apk --release --build-name="$APK_NAME" --build-number="$APK_CODE" --dart-define=API_BASE="$API_BASE"'
+                        # Pre-install the SDK parts the plugins need (kept in volumes, so this is a no-op after the first run).
+                        # Gradle can install them itself, but then fails the same run with "Failed to find target android-37".
+                        (yes | sdkmanager --licenses >/dev/null 2>&1) || true
+                        sdkmanager --install "platforms;android-37.0" "platforms;android-36" "ndk;28.2.13676358" >/dev/null 2>&1 || true
+                        build() { flutter build apk --release --build-name="$APK_NAME" --build-number="$APK_CODE" --dart-define=API_BASE="$API_BASE"; }
+                        build || { echo "Retrying once - Android SDK components were installed during the first attempt"; build; }'
 
                       docker cp ${APK_BUILDER}:/src/build/app/outputs/flutter-apk/app-release.apk ./haulmate.apk
                       ls -lh haulmate.apk

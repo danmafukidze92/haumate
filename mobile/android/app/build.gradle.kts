@@ -16,7 +16,8 @@ if (keystorePropertiesFile.exists()) keystoreProperties.load(FileInputStream(key
 
 android {
     namespace = "zw.haulmate.haulmate_app"
-    compileSdk = flutter.compileSdkVersion
+    // permission_handler_android compiles against SDK 37; compiling the app against the highest one is backward compatible
+    compileSdk = maxOf(flutter.compileSdkVersion, 37)
     ndkVersion = flutter.ndkVersion
 
     compileOptions {
