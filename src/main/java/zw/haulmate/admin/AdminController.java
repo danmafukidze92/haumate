@@ -62,7 +62,8 @@ public class AdminController {
         }
     }
 
-    @GetMapping("/admin/login") public String login() { return "admin/login"; }
+    /** Old admin sign-in address: everyone now signs in at /login and lands on the view for their role. */
+    @GetMapping("/admin/login") public String adminLogin() { return "redirect:/login"; }
     /** Public website: what HaulMate does, how it works, and app downloads (APK, Play Store, App Store). */
     @GetMapping("/")
     public String landing(Model m) {

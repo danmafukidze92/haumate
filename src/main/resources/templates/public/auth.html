@@ -65,8 +65,13 @@
       <label for="lPass">Password</label>
       <input id="lPass" name="password" type="password" required autocomplete="current-password">
       <div class="err" id="err"></div>
+      <div class="err" id="info" style="background:#E3F6EE;color:#16A36A"></div>
       <button class="btn" type="submit">Log in</button>
       <p class="alt">New to HaulMate? <a href="/signup">Create an account</a></p>
+    </form>
+    <!-- Administrators: after the credentials check, this hands the same login to the admin session login -->
+    <form id="adminForm" th:if="${mode == 'login'}" th:action="@{/admin/login}" method="post" style="display:none">
+      <input type="hidden" name="phone"><input type="hidden" name="password">
     </form>
 
     <!-- SIGN UP -->
@@ -105,17 +110,30 @@
     if (!r.ok) throw new Error(j.error || j.message || ('Something went wrong (' + r.status + ')'));
     return j;
   }
-  function done(res) {
-    if (res.user && res.user.role === 'ADMIN') { location.href = '/admin'; return; }
+  // Every role signs in here and lands on its own view:
+  //   shipper -> client panel, driver / fleet owner -> driver panel (both /account), admin -> /admin
+  function done(res, password) {
+    if (res.user && res.user.role === 'ADMIN') {
+      var f = document.getElementById('adminForm');
+      if (!f) { location.href = '/login'; return; }
+      f.phone.value = res.user.phone; f.password.value = password; f.submit();
+      return;
+    }
     try { localStorage.setItem('hm_token', res.token); } catch (e) {}
     location.href = '/account';
   }
-  try { if (localStorage.getItem('hm_token')) location.replace('/account'); } catch (e) {}
+  var qs = new URLSearchParams(location.search);
+  if (qs.has('logout')) { try { localStorage.removeItem('hm_token'); } catch (e) {} }
+  else { try { if (localStorage.getItem('hm_token')) location.replace('/account'); } catch (e) {} }
+  window.addEventListener('DOMContentLoaded', function () {
+    if (qs.has('error')) showErr('Invalid phone or password');
+    if (qs.has('logout')) { var i = document.getElementById('info'); if (i) { i.textContent = 'You have been logged out.'; i.style.display = 'block'; } }
+  });
 
   var lf = document.getElementById('loginForm');
   if (lf) lf.addEventListener('submit', async function (ev) {
     ev.preventDefault(); var b = lf.querySelector('button'); b.disabled = true;
-    try { done(await call('/api/auth/login', { phone: lPhone.value, password: lPass.value })); }
+    try { done(await call('/api/auth/login', { phone: lPhone.value, password: lPass.value }), lPass.value); }
     catch (e) { showErr(e.message); b.disabled = false; }
   });
 

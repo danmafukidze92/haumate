@@ -65,9 +65,10 @@ public class SecurityConfig {
                                  "/", "/download/**", "/privacy", "/login", "/signup", "/account", "/account/").permitAll()
                 .requestMatchers("/admin/**").hasRole("ADMIN")
                 .anyRequest().permitAll())
-            .formLogin(f -> f.loginPage("/admin/login").usernameParameter("phone")
-                .defaultSuccessUrl("/admin", true).permitAll())
-            .logout(l -> l.logoutUrl("/admin/logout").logoutSuccessUrl("/admin/login?logout"));
+            // One sign-in page for everyone (/login). Admins get a session here; customers get a JWT for their panel.
+            .formLogin(f -> f.loginPage("/login").loginProcessingUrl("/admin/login").usernameParameter("phone")
+                .failureUrl("/login?error").defaultSuccessUrl("/admin", true).permitAll())
+            .logout(l -> l.logoutUrl("/admin/logout").logoutSuccessUrl("/login?logout"));
         return http.build();
     }
 

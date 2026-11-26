@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>HaulMate</title>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+  <style>
+    body{margin:0;min-height:100vh;display:grid;place-items:center;font-family:"Plus Jakarta Sans",system-ui,sans-serif;
+      background:linear-gradient(160deg,#0F1A3D,#14204F 55%,#1b2b6b);color:#fff;text-align:center;padding:20px}
+    h1{font-size:64px;margin:0;color:#FF8A4C}p{opacity:.85;max-width:420px;line-height:1.6;margin:12px auto 28px}
+    a{display:inline-block;margin:6px;padding:12px 20px;border-radius:12px;font-weight:700;text-decoration:none;color:#fff;
+      background:linear-gradient(135deg,#F95F53,#FF8A4C)}a.g{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.25)}
+  </style>
+</head>
+<body>
+<div>
+  <h1 th:text="${status}">Oops</h1>
+  <p th:switch="${status}">
+    <span th:case="403">Your session expired or you don't have access to that page. Please log in again.</span>
+    <span th:case="404">We couldn't find that page.</span>
+    <span th:case="*">Something went wrong on our side. Please try again in a moment.</span>
+  </p>
+  <a href="/login">Log in</a><a href="/" class="g">Home</a>
+</div>
+</body>
+</html>
